@@ -14,6 +14,7 @@ use App\Models\Importacao;
 use App\Models\Lancamento;
 use App\Ofx\LeitorOfx;
 use App\Ofx\OfxInvalido;
+use App\Regras\Categorizador;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -54,10 +55,10 @@ class ImportacaoController extends Controller
         return to_route('importacoes.show', $importacao);
     }
 
-    public function show(Importacao $importacao, Conciliador $conciliador): Response
+    public function show(Importacao $importacao, Conciliador $conciliador, Categorizador $categorizador): Response
     {
         return $importacao->pendente()
-            ? $this->previa($importacao, $conciliador)
+            ? $this->previa($importacao, $conciliador, $categorizador)
             : $this->resumo($importacao);
     }
 
@@ -83,7 +84,7 @@ class ImportacaoController extends Controller
         return to_route('importacoes.index');
     }
 
-    private function previa(Importacao $importacao, Conciliador $conciliador): Response
+    private function previa(Importacao $importacao, Conciliador $conciliador, Categorizador $categorizador): Response
     {
         $conta = $importacao->conta;
         $contaAnterior = $conta->importacoes()
@@ -104,6 +105,8 @@ class ImportacaoController extends Controller
                 'descricao' => $item->linha->descricao,
                 'valor' => $item->linha->valor,
                 'situacao' => $item->situacao->value,
+                // A categoria que as regras dão se a linha for importada como nova.
+                'categoria' => $categorizador->categoriaPara($item->linha->descricao, $item->linha->valor)?->nome,
                 'parecidoCom' => $item->parecidoCom === null ? null : $this->lancamento($item->parecidoCom),
             ], $conciliador->classificar($conta, $importacao->linhasDoExtrato())),
         ]);
