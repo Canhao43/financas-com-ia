@@ -9,7 +9,9 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { tiposDeCategoria } from '@/lib/categorias';
 import { index } from '@/routes/categorias';
+import type { TipoCategoria } from '@/types';
 
 defineOptions({
     layout: {
@@ -26,7 +28,7 @@ const props = defineProps<{
     categoria: {
         id: number;
         nome: string;
-        tipo: 'despesa' | 'receita';
+        tipo: TipoCategoria;
         lancamentos: number;
         regras: number;
     } | null;
@@ -38,10 +40,7 @@ const acao = props.categoria
     ? CategoriaController.update.form(props.categoria.id)
     : CategoriaController.store.form();
 
-const tipos = [
-    { valor: 'despesa', rotulo: 'Despesa' },
-    { valor: 'receita', rotulo: 'Receita' },
-];
+const tipos = tiposDeCategoria.map(({ valor, rotulo }) => ({ valor, rotulo }));
 
 const tipo = ref<string>(props.categoria?.tipo ?? 'despesa');
 
@@ -97,6 +96,14 @@ const avisoDeExclusao = [
                 />
                 <p v-if="tipoTravado" class="text-sm text-muted-foreground">
                     Já tem lançamentos, então o tipo não muda.
+                </p>
+                <p
+                    v-else-if="tipo === 'transferencia'"
+                    class="text-sm text-muted-foreground"
+                >
+                    Para dinheiro que só muda de conta, como o pagamento da
+                    fatura do cartão. Vale para saídas e entradas, e fica fora
+                    dos totais de receita e despesa.
                 </p>
                 <InputError :message="errors.tipo" />
             </div>

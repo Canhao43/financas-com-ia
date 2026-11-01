@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TipoCategoria;
 use App\Http\Requests\SalvarLancamentoRequest;
 use App\Models\Categoria;
 use App\Models\Conta;
@@ -133,7 +132,7 @@ class LancamentoController extends Controller
                 ->map(fn (Categoria $categoria) => [
                     'id' => $categoria->id,
                     'nome' => $categoria->nome,
-                    'direcao' => $categoria->tipo === TipoCategoria::Receita ? 'entrada' : 'saida',
+                    'direcoes' => $categoria->tipo->direcoes(),
                 ]),
         ];
     }

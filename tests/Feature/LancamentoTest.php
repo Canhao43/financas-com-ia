@@ -157,6 +157,25 @@ class LancamentoTest extends TestCase
         ]))->assertSessionHasErrors('categoria_id');
     }
 
+    public function test_transferencia_serve_para_saida_e_para_entrada(): void
+    {
+        $conta = Conta::factory()->create();
+        $entreContas = Categoria::factory()->transferencia()->create();
+
+        foreach (['saida', 'entrada'] as $direcao) {
+            $this->post(route('lancamentos.store'), $this->formulario($conta, [
+                'direcao' => $direcao,
+                'categoria_id' => $entreContas->id,
+            ]))->assertSessionHasNoErrors();
+        }
+
+        $this->assertSame(2, $entreContas->lancamentos()->count());
+
+        $this->get(route('lancamentos.create'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('categorias.0.direcoes', ['saida', 'entrada']));
+    }
+
     public function test_lancamento_de_conta_arquivada_continua_editavel(): void
     {
         $arquivada = Conta::factory()->arquivada()->create();

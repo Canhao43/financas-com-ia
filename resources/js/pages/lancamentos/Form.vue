@@ -27,7 +27,7 @@ defineOptions({
 
 const props = defineProps<{
     contas: Opcao[];
-    categorias: (Opcao & { direcao: Direcao })[];
+    categorias: (Opcao & { direcoes: Direcao[] })[];
     lancamento: {
         id: number;
         direcao: Direcao;
@@ -62,8 +62,11 @@ const contaId = ref(
 );
 const categoriaId = ref(String(props.lancamento?.categoria_id ?? ''));
 
+// Transferência serve para as duas direções: sai de uma conta e entra na outra.
 const categoriasDaDirecao = computed(() =>
-    props.categorias.filter((categoria) => categoria.direcao === direcao.value),
+    props.categorias.filter((categoria) =>
+        categoria.direcoes.includes(direcao.value as Direcao),
+    ),
 );
 
 // Ao trocar entre saída e entrada, a categoria escolhida pode não servir mais.

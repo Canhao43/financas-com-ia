@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Backup;
+use App\Models\Categoria;
 use App\Models\Conta;
 use App\Models\Lancamento;
 use App\Models\User;
@@ -45,10 +46,31 @@ class DashboardTest extends TestCase
         $this->get(route('dashboard'))
             ->assertInertia(fn (Assert $page) => $page
                 ->where('saldoTotal', 240000)
-                ->where('entradasDoMes', 200000)
-                ->where('saidasDoMes', -50000)
+                ->where('receitasDoMes', 200000)
+                ->where('despesasDoMes', -50000)
                 ->has('ultimos', 3)
                 ->where('ultimos.0.data', '2026-10-31'));
+    }
+
+    public function test_transferencia_entre_contas_nao_e_receita_nem_despesa(): void
+    {
+        $banco = Conta::factory()->create(['saldo_inicial' => 300000]);
+        $cartao = Conta::factory()->create(['saldo_inicial' => -120000]);
+        $entreContas = Categoria::factory()->transferencia()->create();
+        $mercado = Categoria::factory()->create();
+
+        // A compra no cartão é a despesa; pagar a fatura só tira de uma conta e põe na outra.
+        Lancamento::factory()->for($cartao)->saida(80000)->create(['data' => '2026-10-03', 'categoria_id' => $mercado->id]);
+        Lancamento::factory()->for($banco)->saida(120000)->create(['data' => '2026-10-10', 'categoria_id' => $entreContas->id]);
+        Lancamento::factory()->for($cartao)->entrada(120000)->create(['data' => '2026-10-10', 'categoria_id' => $entreContas->id]);
+        // Sem categoria continua contando: só a transferência sai dos totais.
+        Lancamento::factory()->for($banco)->saida(5000)->create(['data' => '2026-10-12', 'categoria_id' => null]);
+
+        $this->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('saldoTotal', 300000 - 120000 - 80000 - 5000)
+                ->where('receitasDoMes', 0)
+                ->where('despesasDoMes', -85000));
     }
 
     public function test_o_mes_do_painel_segue_o_horario_de_sao_paulo(): void

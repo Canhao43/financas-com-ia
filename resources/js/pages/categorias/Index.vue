@@ -4,7 +4,9 @@ import { Plus } from '@lucide/vue';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
+import { tiposDeCategoria } from '@/lib/categorias';
 import { create, edit, index } from '@/routes/categorias';
+import type { TipoCategoria } from '@/types';
 
 defineOptions({
     layout: {
@@ -21,21 +23,17 @@ const props = defineProps<{
     categorias: {
         id: number;
         nome: string;
-        tipo: 'despesa' | 'receita';
+        tipo: TipoCategoria;
         lancamentos: number;
     }[];
 }>();
 
-const grupos = computed(() => [
-    {
-        titulo: 'Despesas',
-        itens: props.categorias.filter((c) => c.tipo === 'despesa'),
-    },
-    {
-        titulo: 'Receitas',
-        itens: props.categorias.filter((c) => c.tipo === 'receita'),
-    },
-]);
+const grupos = computed(() =>
+    tiposDeCategoria.map((tipo) => ({
+        titulo: tipo.plural,
+        itens: props.categorias.filter((c) => c.tipo === tipo.valor),
+    })),
+);
 
 function quantidade(total: number): string {
     return total === 1 ? '1 lançamento' : `${total} lançamentos`;
@@ -50,7 +48,7 @@ function quantidade(total: number): string {
             <Heading
                 variant="small"
                 title="Categorias"
-                description="Despesa vale para saídas; receita, para entradas."
+                description="Despesa vale para saídas; receita, para entradas; transferência, para as duas, e fica fora dos totais."
             />
             <Button as-child>
                 <Link :href="create()"><Plus />Nova</Link>

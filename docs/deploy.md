@@ -110,6 +110,7 @@ docker run --rm ghcr.io/canhao43/financas-com-ia php artisan key:generate --show
 nano .env   # cole a chave em APP_KEY e troque seu-nome em SERVER_NAME e APP_URL
 
 docker compose up -d --wait
+docker compose exec app php artisan db:seed --force   # categorias de partida
 docker compose exec app php artisan usuario:criar
 ```
 

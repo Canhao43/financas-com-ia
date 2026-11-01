@@ -15,14 +15,20 @@ class CategoriaPadraoSeeder extends Seeder
 
     public const RECEITAS = ['Salário', 'Renda extra', 'Rendimentos', 'Reembolso', 'Outras receitas'];
 
+    public const TRANSFERENCIAS = ['Transferência entre contas'];
+
     public function run(): void
     {
-        foreach (self::DESPESAS as $nome) {
-            Categoria::query()->firstOrCreate(['nome' => $nome, 'tipo' => TipoCategoria::Despesa]);
-        }
+        $categorias = [
+            TipoCategoria::Despesa->value => self::DESPESAS,
+            TipoCategoria::Receita->value => self::RECEITAS,
+            TipoCategoria::Transferencia->value => self::TRANSFERENCIAS,
+        ];
 
-        foreach (self::RECEITAS as $nome) {
-            Categoria::query()->firstOrCreate(['nome' => $nome, 'tipo' => TipoCategoria::Receita]);
+        foreach ($categorias as $tipo => $nomes) {
+            foreach ($nomes as $nome) {
+                Categoria::query()->firstOrCreate(['nome' => $nome, 'tipo' => $tipo]);
+            }
         }
     }
 }

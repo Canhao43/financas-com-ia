@@ -22,6 +22,7 @@ class SeedersTest extends TestCase
 
         $this->assertDatabaseCount('users', 0);
         $this->assertGreaterThan(0, Categoria::query()->count());
+        $this->assertDatabaseHas('categorias', ['nome' => 'Transferência entre contas', 'tipo' => 'transferencia']);
     }
 
     public function test_categorias_padrao_nao_duplicam_ao_rodar_de_novo(): void

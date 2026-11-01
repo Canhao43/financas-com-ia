@@ -100,6 +100,15 @@ class RegraTest extends TestCase
         $this->assertNull($this->categoriaPara('PIX PARA EMPRESA', -10000));
     }
 
+    public function test_regra_de_transferencia_vale_nas_duas_direcoes(): void
+    {
+        $this->regra('FATURA CARTAO', Categoria::factory()->transferencia()->create(['nome' => 'Entre contas']));
+
+        // Sai da conta corrente e entra no cartão.
+        $this->assertSame('Entre contas', $this->categoriaPara('PAGTO FATURA CARTAO', -120000));
+        $this->assertSame('Entre contas', $this->categoriaPara('FATURA CARTAO RECEBIDA', 120000));
+    }
+
     public function test_acento_e_caixa_nao_importam(): void
     {
         $this->regra('PADARIA SAO JOAO', Categoria::factory()->create(['nome' => 'Padaria']));

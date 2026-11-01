@@ -14,15 +14,16 @@ class DashboardController extends Controller
     public function __invoke(): Response
     {
         $mes = CarbonImmutable::today()->startOfMonth();
-        $doMes = Lancamento::query()->doMes($mes);
+        // Transferência entre contas não é receita nem despesa: o saldo total não muda com ela.
+        $doMes = Lancamento::query()->doMes($mes)->semTransferencias();
 
         return Inertia::render('Dashboard', [
             'mes' => $mes->format('Y-m'),
             // Saldo de todas as contas ativas: inicial mais lançamentos, somado aqui.
             'saldoTotal' => Conta::query()->where('arquivada', false)->comSaldo()->get()
                 ->sum(fn (Conta $conta) => $conta->saldoAtual()),
-            'entradasDoMes' => (int) (clone $doMes)->where('valor', '>', 0)->sum('valor'),
-            'saidasDoMes' => (int) (clone $doMes)->where('valor', '<', 0)->sum('valor'),
+            'receitasDoMes' => (int) (clone $doMes)->where('valor', '>', 0)->sum('valor'),
+            'despesasDoMes' => (int) (clone $doMes)->where('valor', '<', 0)->sum('valor'),
             'ultimos' => Lancamento::query()->with('categoria:id,nome')->orderByDesc('data')->orderByDesc('id')->limit(5)->get()
                 ->map(fn (Lancamento $lancamento) => [
                     'id' => $lancamento->id,

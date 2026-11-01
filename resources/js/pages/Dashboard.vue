@@ -24,8 +24,8 @@ defineOptions({
 defineProps<{
     mes: string;
     saldoTotal: number;
-    entradasDoMes: number;
-    saidasDoMes: number;
+    receitasDoMes: number;
+    despesasDoMes: number;
     ultimos: LancamentoDaLista[];
     avisoDeBackup: string | null;
 }>();
@@ -60,8 +60,8 @@ defineProps<{
                 titulo="Saldo das contas"
                 :centavos="saldoTotal"
             />
-            <CartaoValor titulo="Entradas do mês" :centavos="entradasDoMes" />
-            <CartaoValor titulo="Saídas do mês" :centavos="saidasDoMes" />
+            <CartaoValor titulo="Receitas do mês" :centavos="receitasDoMes" />
+            <CartaoValor titulo="Despesas do mês" :centavos="despesasDoMes" />
         </div>
 
         <section class="space-y-2">
