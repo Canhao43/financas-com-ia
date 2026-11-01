@@ -83,9 +83,8 @@ ENV APP_ENV=production \
 
 USER financas
 
-# A imagem tem dois papéis (site e agendador), e só o site tem o que checar: a checagem de
-# saúde fica no compose, no serviço do site. A da imagem base usa a API de administração do
-# Caddy, que o Caddyfile desliga.
+# A imagem tem dois papéis (site e agendador), cada um com a sua checagem de saúde, no
+# compose. A herdada da imagem base usa a API de administração do Caddy, que o Caddyfile desliga.
 HEALTHCHECK NONE
 
 ENTRYPOINT ["iniciar"]

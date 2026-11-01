@@ -39,6 +39,14 @@ services:
         command: ['php', 'artisan', 'schedule:work']
         volumes:
             - dados:/dados
+        # Saudável = o app sobe com a configuração de produção e enxerga o banco migrado.
+        # Precisa existir: o "up --wait" recusa serviço com a checagem desligada.
+        healthcheck:
+            test: ['CMD', 'php', 'artisan', 'migrate:status']
+            interval: 5m
+            timeout: 30s
+            start_period: 2m
+            start_interval: 5s
 
 volumes:
     dados:
