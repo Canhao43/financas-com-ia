@@ -11,8 +11,8 @@ Não é demonstração: é o app que eu uso para as minhas finanças. Por isso o
 | Marco  | O que entra                                                                                                      | Estado |
 | ------ | ---------------------------------------------------------------------------------------------------------------- | ------ |
 | **M0** | Base segura: login sem cadastro público, autenticação em dois fatores e passkeys, usuário criado por comando, CI | ✅     |
-| **M1** | Contas, categorias e lançamentos — telas em português, que funcionam no celular                                  | ⏳     |
-| **M2** | Importação de extrato OFX sem duplicar lançamento, e categorização por regras                                    | ⏳     |
+| **M1** | Contas, categorias e lançamentos — telas em português, que funcionam no celular                                  | ✅     |
+| **M2** | Importação de extrato OFX sem duplicar lançamento, e categorização por regras                                    | 🟡     |
 | **M3** | Deploy: servidor, HTTPS e backup — a partir daqui, uso de verdade                                                | ⏳     |
 | **M4** | Relatórios calculados no código: o mês por categoria e a comparação com o anterior                               | ⏳     |
 | **M5** | Assistente com o Claude: perguntas respondidas por ferramentas que consultam o banco                             | ⏳     |
@@ -40,6 +40,7 @@ Verificações (as mesmas do CI): `composer ci:check` — lint, checagem de tipo
 - **Dado real nunca entra no repositório.** Seeds e testes usam dado fictício; extrato e banco ficam fora do Git.
 - **Um usuário só, criado no servidor.** Sem formulário de cadastro que qualquer um na internet alcance.
 - **A IA não faz conta.** Somas e comparações são calculadas no código e testadas; o modelo recebe os números prontos.
+- **Importar o mesmo extrato de novo não duplica nada.** Cada linha é reconhecida pelo identificador do banco ou por uma impressão digital dela, nada é gravado antes de uma prévia, e o app confere o próprio saldo com o que o banco informa.
 - **O mínimo de dado sai para a API de IA:** só o necessário para responder.
 
 ## Stack

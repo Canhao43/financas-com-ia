@@ -13,3 +13,37 @@ export type LancamentoDaLista = {
     categoria: string | null;
     conta?: string;
 };
+
+export type LancamentoResumido = {
+    id: number;
+    data: string;
+    descricao: string;
+    valor: number;
+    categoria: string | null;
+};
+
+export type Importacao = {
+    id: number;
+    status: 'pendente' | 'concluida';
+    arquivo: string;
+    conta: string;
+    contaId: number;
+    inicio: string | null;
+    fim: string | null;
+    criadaEm: string | null;
+    importados: number;
+    vinculados: number;
+    jaExistiam: number;
+    ignorados: number;
+};
+
+export type SituacaoDaLinha = 'nova' | 'ja_existe' | 'parecida';
+
+export type LinhaDaPrevia = {
+    indice: number;
+    data: string;
+    descricao: string;
+    valor: number;
+    situacao: SituacaoDaLinha;
+    parecidoCom: LancamentoResumido | null;
+};

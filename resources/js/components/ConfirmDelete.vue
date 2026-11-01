@@ -13,18 +13,22 @@ import {
 } from '@/components/ui/dialog';
 import type { RouteFormDefinition } from '@/wayfinder';
 
-defineProps<{
-    acao: RouteFormDefinition<'post'>;
-    titulo: string;
-    descricao: string;
-}>();
+withDefaults(
+    defineProps<{
+        acao: RouteFormDefinition<'post'>;
+        titulo: string;
+        descricao: string;
+        rotulo?: string;
+    }>(),
+    { rotulo: 'Excluir' },
+);
 </script>
 
 <template>
     <Dialog>
         <DialogTrigger as-child>
             <Button type="button" variant="ghost" class="text-destructive">
-                <Trash2 />Excluir
+                <Trash2 />{{ rotulo }}
             </Button>
         </DialogTrigger>
         <DialogContent>
@@ -41,7 +45,7 @@ defineProps<{
                         class="w-full"
                         :disabled="processing"
                     >
-                        Excluir
+                        {{ rotulo }}
                     </Button>
                 </Form>
             </DialogFooter>

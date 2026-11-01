@@ -42,3 +42,8 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Extrato de verdade nunca entra no Git; só os fictícios dos testes.
+*.ofx
+*.qfx
+!/tests/fixtures/ofx/*.ofx
