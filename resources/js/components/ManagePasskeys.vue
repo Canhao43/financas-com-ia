@@ -34,7 +34,7 @@ const handleRegisterSuccess = () => {
         <Heading
             variant="small"
             title="Passkeys"
-            description="Manage your passkeys for passwordless sign-in"
+            description="Entre sem senha, com biometria ou chave de segurança"
         />
 
         <div class="overflow-hidden rounded-lg border border-border">
@@ -53,9 +53,9 @@ const handleRegisterSuccess = () => {
                 >
                     <KeyRound class="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p class="font-medium">No passkeys yet</p>
+                <p class="font-medium">Nenhuma passkey cadastrada</p>
                 <p class="mt-1 text-sm text-muted-foreground">
-                    Add a passkey to sign in without a password
+                    Cadastre uma passkey para entrar sem senha
                 </p>
             </div>
         </div>
