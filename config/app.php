@@ -65,7 +65,9 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // O fuso decide "que dia é hoje": em UTC, depois das 21h em São Paulo o lançamento
+    // novo já nasceria com a data de amanhã. App de uma pessoa, no Brasil.
+    'timezone' => 'America/Sao_Paulo',
 
     /*
     |--------------------------------------------------------------------------

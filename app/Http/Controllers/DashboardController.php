@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Backup;
 use App\Models\Conta;
 use App\Models\Lancamento;
 use Carbon\CarbonImmutable;
@@ -30,6 +31,33 @@ class DashboardController extends Controller
                     'valor' => $lancamento->valor,
                     'categoria' => $lancamento->categoria?->nome,
                 ]),
+            'avisoDeBackup' => $this->avisoDeBackup(),
         ]);
+    }
+
+    /**
+     * Backup que falha em silêncio só é descoberto no dia em que se precisa dele. O aviso
+     * fica na tela que o dono abre todo dia, sem depender de serviço de monitoramento.
+     */
+    private function avisoDeBackup(): ?string
+    {
+        if (! config()->boolean('backup.avisar')) {
+            return null;
+        }
+
+        $ultimo = Backup::query()->where('sucesso', true)->latest('id')->first();
+        $quando = $ultimo?->created_at;
+
+        if ($quando !== null && $quando->greaterThan(now()->subHours(config()->integer('backup.aviso_depois_de_horas')))) {
+            return null;
+        }
+
+        $aviso = $quando === null
+            ? 'Nenhum backup deu certo até agora.'
+            : 'O último backup que deu certo foi em '.$quando->format('d/m/Y').' às '.$quando->format('H:i').'.';
+
+        $falha = Backup::query()->where('sucesso', false)->where('id', '>', $ultimo->id ?? 0)->latest('id')->value('erro');
+
+        return is_string($falha) ? "{$aviso} Última falha: {$falha}" : $aviso;
     }
 }

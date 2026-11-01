@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Plus, TriangleAlert } from '@lucide/vue';
 import CartaoValor from '@/components/CartaoValor.vue';
 import LinhaLancamento from '@/components/LinhaLancamento.vue';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ defineProps<{
     entradasDoMes: number;
     saidasDoMes: number;
     ultimos: LancamentoDaLista[];
+    avisoDeBackup: string | null;
 }>();
 </script>
 
@@ -34,6 +35,18 @@ defineProps<{
     <Head title="Painel" />
 
     <div class="flex flex-1 flex-col gap-4 p-4">
+        <div
+            v-if="avisoDeBackup"
+            role="alert"
+            class="flex gap-3 rounded-xl border border-amber-500/50 bg-amber-500/10 p-4 text-sm"
+        >
+            <TriangleAlert class="size-5 shrink-0 text-amber-600" />
+            <p>
+                <strong>Backup atrasado.</strong> {{ avisoDeBackup }} O que foi
+                lançado depois disso ainda não tem cópia fora do servidor.
+            </p>
+        </div>
+
         <div class="flex items-center justify-between gap-3">
             <h1 class="text-lg font-semibold">{{ nomeDoMes(mes) }}</h1>
             <Button as-child>
