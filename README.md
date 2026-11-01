@@ -27,6 +27,7 @@ Precisa de PHP 8.4, Composer e Node.
 git clone https://github.com/Canhao43/financas-com-ia.git
 cd financas-com-ia
 composer setup            # dependências, .env, chave, migrations e build do front
+php artisan db:seed       # categorias de partida; rodar de novo só cria as que faltam
 php artisan usuario:criar # o único usuário do app — não existe cadastro público
 composer dev              # servidor, fila e Vite
 ```

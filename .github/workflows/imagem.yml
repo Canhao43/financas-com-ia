@@ -70,8 +70,11 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost/login)" = "308"
           test "$(curl -ks -o /dev/null -w '%{http_code}' https://localhost/register)" = "404"
 
-      - name: O banco foi migrado na subida
-        run: docker compose exec -T app php artisan migrate:status | grep 'create_backups_table' | grep -q 'Ran'
+      - name: O banco foi migrado na subida, e as categorias de partida entram
+        run: |
+          docker compose exec -T app php artisan migrate:status | grep 'create_backups_table' | grep -q 'Ran'
+          docker compose exec -T app php artisan db:seed --force
+          test "$(docker compose exec -T app php -r 'echo (new PDO("sqlite:/dados/financas.sqlite"))->query("select count(*) from categorias")->fetchColumn();')" -gt 0
 
       - name: Backup de verdade, e a volta dele
         run: |
