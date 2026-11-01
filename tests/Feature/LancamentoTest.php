@@ -6,6 +6,7 @@ use App\Models\Categoria;
 use App\Models\Conta;
 use App\Models\Lancamento;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -189,6 +190,15 @@ class LancamentoTest extends TestCase
 
         $this->get(route('lancamentos.edit', $lancamento))
             ->assertInertia(fn (Assert $page) => $page->has('contas', 2));
+    }
+
+    public function test_a_data_padrao_e_o_dia_de_hoje_em_sao_paulo(): void
+    {
+        // 23h30 de 30/11 em São Paulo; em UTC já é 01/12.
+        $this->travelTo(CarbonImmutable::parse('2026-12-01 02:30:00', 'UTC'));
+
+        $this->get(route('lancamentos.create'))
+            ->assertInertia(fn (Assert $page) => $page->where('padrao.data', '2026-11-30'));
     }
 
     public function test_edicao_devolve_o_valor_no_formato_de_digitacao(): void

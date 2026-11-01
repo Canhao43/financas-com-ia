@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Conta;
 use App\Models\Lancamento;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -47,6 +48,15 @@ class DashboardTest extends TestCase
                 ->where('saidasDoMes', -50000)
                 ->has('ultimos', 3)
                 ->where('ultimos.0.data', '2026-10-31'));
+    }
+
+    public function test_o_mes_do_painel_segue_o_horario_de_sao_paulo(): void
+    {
+        // 23h30 do último dia de novembro em São Paulo; em UTC já é dezembro.
+        $this->travelTo(CarbonImmutable::parse('2026-12-01 02:30:00', 'UTC'));
+
+        $this->get(route('dashboard'))
+            ->assertInertia(fn (Assert $page) => $page->where('mes', '2026-11'));
     }
 
     public function test_mostra_so_os_cinco_ultimos_lancamentos(): void
