@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { ArrowLeftRight, LayoutGrid, Tags, Wallet } from '@lucide/vue';
+import { ArrowLeftRight, FileUp, LayoutGrid, Tags, Wallet } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -16,6 +16,7 @@ import {
 import { dashboard } from '@/routes';
 import { index as categorias } from '@/routes/categorias';
 import { index as contas } from '@/routes/contas';
+import { index as importacoes } from '@/routes/importacoes';
 import { index as lancamentos } from '@/routes/lancamentos';
 import type { NavItem } from '@/types';
 
@@ -29,6 +30,11 @@ const mainNavItems: NavItem[] = [
         title: 'Lançamentos',
         href: lancamentos(),
         icon: ArrowLeftRight,
+    },
+    {
+        title: 'Importações',
+        href: importacoes(),
+        icon: FileUp,
     },
     {
         title: 'Contas',

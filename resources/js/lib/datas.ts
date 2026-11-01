@@ -19,3 +19,17 @@ export function nomeDoMes(anoMes: string): string {
 
     return nome.charAt(0).toUpperCase() + nome.slice(1);
 }
+
+/**
+ * O período do extrato, quando o banco informa: "01/10/2026 a 31/10/2026".
+ */
+export function formatarPeriodo(
+    inicio: string | null,
+    fim: string | null,
+): string {
+    if (!inicio || !fim) {
+        return 'período não informado';
+    }
+
+    return `${formatarData(inicio)} a ${formatarData(fim)}`;
+}
