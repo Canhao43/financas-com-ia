@@ -93,7 +93,6 @@ jobs:
           backups() {
             docker compose exec -T app php -r 'echo (new PDO("sqlite:/dados/financas.sqlite"))->query("select count(*) from backups")->fetchColumn();'
           }
-          docker compose exec -T app php artisan tinker --execute 'echo App\Models\Backup::count();' | cat -A || true
           test "$(backups)" = "1"
           cp restaurado.sqlite financas.sqlite
           docker compose stop
@@ -103,6 +102,15 @@ jobs:
           test "$(backups)" = "0"
           # E o app continua conseguindo escrever no banco restaurado.
           docker compose exec -T agendador php artisan backup:criar
+
+      - name: Troca a senha pelo tinker, como no docs/deploy.md
+        run: |
+          tinker() { docker compose exec -T app php artisan tinker --execute "$1"; }
+          tinker 'App\Models\User::forceCreate(["name" => "Teste", "email" => "teste@example.com", "password" => "senha-antiga-123", "email_verified_at" => now()]);'
+          tinker "App\Models\User::first()->update(['password' => 'a senha nova']);"
+          resultado=$(tinker "echo Illuminate\Support\Facades\Hash::check('a senha nova', App\Models\User::first()->password) ? 'trocada' : 'igual';")
+          echo "$resultado"
+          test "$resultado" = "trocada"
 
       - name: Logs, se algo falhou
         if: failure()

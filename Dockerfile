@@ -66,9 +66,10 @@ COPY . .
 COPY --from=front /app/vendor ./vendor
 COPY --from=front /app/bootstrap/cache ./bootstrap/cache
 COPY --from=front /app/public/build ./public/build
+# /config/psysh: sem ela, o tinker (a troca de senha do docs/deploy.md) não roda.
 RUN useradd --create-home financas \
-    && mkdir /dados \
-    && chown -R financas:financas /dados storage bootstrap/cache /config/caddy /data/caddy
+    && mkdir /dados /config/psysh \
+    && chown -R financas:financas /dados storage bootstrap/cache /config/caddy /config/psysh /data/caddy
 
 # O que vale para toda instalação fica na imagem; o .env do servidor guarda só o que é dele.
 ENV APP_ENV=production \
