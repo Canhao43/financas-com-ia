@@ -12,7 +12,7 @@ Não é demonstração: é o app que eu uso para as minhas finanças. Por isso o
 | ------ | ---------------------------------------------------------------------------------------------------------------- | ------ |
 | **M0** | Base segura: login sem cadastro público, autenticação em dois fatores e passkeys, usuário criado por comando, CI | ✅     |
 | **M1** | Contas, categorias e lançamentos — telas em português, que funcionam no celular                                  | ✅     |
-| **M2** | Importação de extrato OFX sem duplicar lançamento, e categorização por regras                                    | 🟡     |
+| **M2** | Importação de extrato OFX sem duplicar lançamento, e categorização por regras                                    | ✅     |
 | **M3** | Deploy: servidor, HTTPS e backup — a partir daqui, uso de verdade                                                | ⏳     |
 | **M4** | Relatórios calculados no código: o mês por categoria e a comparação com o anterior                               | ⏳     |
 | **M5** | Assistente com o Claude: perguntas respondidas por ferramentas que consultam o banco                             | ⏳     |
