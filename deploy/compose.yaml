@@ -23,15 +23,22 @@ services:
             - dados:/dados
             # Certificados do Let's Encrypt: sem isso, cada recriação do container pediria um novo.
             - caddy:/data/caddy
+        # O /up do Laravel pelo mesmo caminho de quem acessa: HTTPS, no nome do site. É o que o
+        # "up --wait" do atualizar.sh espera antes de dar a atualização por concluída.
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - curl -kfsS --resolve "$${SERVER_NAME}:443:127.0.0.1" "https://$${SERVER_NAME}/up" > /dev/null
+            interval: 30s
+            timeout: 5s
+            start_period: 2m
+            start_interval: 5s
 
     agendador:
         <<: *app
         command: ['php', 'artisan', 'schedule:work']
         volumes:
             - dados:/dados
-        # A checagem da imagem testa o site, que não roda aqui.
-        healthcheck:
-            disable: true
 
 volumes:
     dados:

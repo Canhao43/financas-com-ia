@@ -83,9 +83,10 @@ ENV APP_ENV=production \
 
 USER financas
 
-# O /up do Laravel, pelo mesmo caminho de quem acessa: HTTPS no nome do site.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --start-interval=5s \
-    CMD curl -kfsS --resolve "${SERVER_NAME:-localhost}:443:127.0.0.1" "https://${SERVER_NAME:-localhost}/up" > /dev/null || exit 1
+# A imagem tem dois papéis (site e agendador), e só o site tem o que checar: a checagem de
+# saúde fica no compose, no serviço do site. A da imagem base usa a API de administração do
+# Caddy, que o Caddyfile desliga.
+HEALTHCHECK NONE
 
 ENTRYPOINT ["iniciar"]
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile", "--adapter", "caddyfile"]
