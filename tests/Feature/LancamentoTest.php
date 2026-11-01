@@ -77,6 +77,30 @@ class LancamentoTest extends TestCase
                 ->where('totais.saldo', -2000));
     }
 
+    public function test_filtra_pela_categoria_que_vem_do_relatorio(): void
+    {
+        $mercado = Categoria::factory()->create(['nome' => 'Mercado']);
+        Lancamento::factory()->saida(1000)->create(['data' => '2026-10-10', 'categoria_id' => $mercado->id]);
+        Lancamento::factory()->saida(2000)->create(['data' => '2026-10-11', 'categoria_id' => null]);
+        Lancamento::factory()->saida(4000)->create(['data' => '2026-10-12', 'categoria_id' => Categoria::factory()]);
+
+        $this->get(route('lancamentos.index', ['mes' => '2026-10', 'categoria' => $mercado->id]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('categoria', ['filtro' => (string) $mercado->id, 'nome' => 'Mercado'])
+                ->where('totais.saldo', -1000));
+
+        $this->get(route('lancamentos.index', ['mes' => '2026-10', 'categoria' => 'sem']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('categoria', ['filtro' => 'sem', 'nome' => 'Sem categoria'])
+                ->where('totais.saldo', -2000));
+
+        // Filtro que não é id nem "sem" é ignorado, não vira lista vazia.
+        $this->get(route('lancamentos.index', ['mes' => '2026-10', 'categoria' => 'xyz']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('categoria', null)
+                ->where('totais.saldo', -7000));
+    }
+
     public function test_mes_invalido_cai_no_mes_atual(): void
     {
         $this->get(route('lancamentos.index', ['mes' => '2026-13']))
