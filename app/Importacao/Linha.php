@@ -4,8 +4,8 @@ namespace App\Importacao;
 
 use App\Ofx\Extrato;
 use App\Ofx\TransacaoOfx;
+use App\Support\Texto;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Str;
 
 /**
  * Uma linha do extrato pronta para comparar com o banco: com a impressão digital calculada e o
@@ -36,7 +36,7 @@ final readonly class Linha
         $linhas = [];
 
         foreach ($extrato->transacoes as $transacao) {
-            $chave = implode('|', [$transacao->data->toDateString(), $transacao->valor, self::normalizar($transacao->descricao)]);
+            $chave = implode('|', [$transacao->data->toDateString(), $transacao->valor, Texto::normalizar($transacao->descricao)]);
             $vistas[$chave] = ($vistas[$chave] ?? 0) + 1;
 
             $linhas[] = new self(
@@ -51,14 +51,6 @@ final readonly class Linha
         }
 
         return $linhas;
-    }
-
-    /**
-     * Maiúsculas, sem acento e sem espaço repetido: diferença de digitação do banco não muda a impressão.
-     */
-    public static function normalizar(string $descricao): string
-    {
-        return Str::of($descricao)->ascii()->upper()->squish()->toString();
     }
 
     /**
