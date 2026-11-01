@@ -24,4 +24,12 @@ interface Ferramenta
      * @throws EntradaInvalida
      */
     public function executar(array $entrada): array;
+
+    /**
+     * A consulta em palavras, para a tela mostrar de onde veio cada resposta. Recebe a entrada
+     * crua do modelo, que pode estar errada: só descreve, não valida.
+     *
+     * @param  array<string, mixed>  $entrada
+     */
+    public function descrever(array $entrada): string;
 }

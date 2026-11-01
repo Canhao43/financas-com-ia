@@ -46,6 +46,14 @@ final class CaixaDeFerramentas
     /**
      * @param  array<string, mixed>  $entrada
      */
+    public function descrever(string $nome, array $entrada): string
+    {
+        return isset($this->ferramentas[$nome]) ? $this->ferramentas[$nome]->descrever($entrada) : "Consulta desconhecida ({$nome})";
+    }
+
+    /**
+     * @param  array<string, mixed>  $entrada
+     */
     public function executar(string $nome, array $entrada): ResultadoDaFerramenta
     {
         $ferramenta = $this->ferramentas[$nome] ?? null;

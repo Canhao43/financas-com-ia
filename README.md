@@ -15,7 +15,7 @@ Não é demonstração: é o app que eu uso para as minhas finanças. Por isso o
 | **M2** | Importação de extrato OFX sem duplicar lançamento, e categorização por regras                                    | ✅     |
 | **M3** | Deploy: servidor, HTTPS e backup — imagem e roteiro prontos; a publicação fica para depois                       | 🟡     |
 | **M4** | Relatórios calculados no código: o mês por categoria e a comparação com o anterior                               | ✅     |
-| **M5** | Assistente com o Claude: perguntas respondidas por ferramentas que consultam o banco                             | ⏳     |
+| **M5** | Assistente com o Claude: perguntas respondidas por ferramentas que consultam o banco                             | ✅     |
 | **M6** | Relatório mensal escrito pelo Claude e conferido contra os números calculados                                    | ⏳     |
 | **M7** | Registro de decisões                                                                                             | ⏳     |
 
@@ -34,6 +34,8 @@ composer dev              # servidor, fila e Vite
 
 O app fica em `http://localhost:8000`. No primeiro acesso, ative a autenticação em dois fatores em _Configurações → Segurança_.
 
+O assistente usa a API da Anthropic: coloque a sua chave em `ANTHROPIC_API_KEY` no `.env`. Sem ela, ele fica desligado e o resto do app funciona igual. O modelo padrão é o Claude Opus 5.5; para outro, `ANTHROPIC_MODEL`.
+
 Verificações (as mesmas do CI): `composer ci:check` — lint, checagem de tipos do front, PHPStan e testes.
 
 ## Produção
@@ -44,15 +46,16 @@ Uma imagem Docker com FrankenPHP (HTTPS automático pelo Caddy) e SQLite, public
 
 - **Dado real nunca entra no repositório.** Seeds e testes usam dado fictício; extrato e banco ficam fora do Git.
 - **Um usuário só, criado no servidor.** Sem formulário de cadastro que qualquer um na internet alcance.
-- **A IA não faz conta.** Somas e comparações são calculadas no código e testadas; o modelo recebe os números prontos.
-- **Um cálculo só para cada número.** O relatório, o painel e (no M5) o assistente leem os totais do mesmo serviço, então nunca discordam. Transferência entre contas, como o pagamento da fatura, fica fora de receitas e despesas: a compra no cartão já é o gasto.
+- **A IA não faz conta, e o app confere.** O Claude só consulta: as ferramentas devolvem os valores já calculados e formatados, e todo valor em reais ou porcentagem da resposta é comparado com o que as consultas devolveram. O que não saiu de nenhuma aparece marcado como "sem fonte".
+- **O assistente só lê.** Nenhuma ferramenta grava, apaga ou envia nada: um texto malicioso num extrato importado pode, no máximo, confundir uma resposta.
+- **Um cálculo só para cada número.** O relatório, o painel e o assistente leem os totais do mesmo serviço, então nunca discordam. Transferência entre contas, como o pagamento da fatura, fica fora de receitas e despesas: a compra no cartão já é o gasto.
 - **Importar o mesmo extrato de novo não duplica nada.** Cada linha é reconhecida pelo identificador do banco ou por uma impressão digital dela, nada é gravado antes de uma prévia, e o app confere o próprio saldo com o que o banco informa.
 - **O mínimo de dado sai para a API de IA:** só o necessário para responder.
 - **Backup que ninguém confere não é backup.** Todo dia ele sai do servidor cifrado com uma chave que o servidor não tem, o painel avisa quando atrasa, e o CI restaura um a cada build.
 
 ## Stack
 
-Laravel 13 · PHP 8.4 · Inertia 3 · Vue 3 · TypeScript · Tailwind 4 · Fortify (2FA e passkeys) · PHPUnit 12 · PHPStan · Docker · FrankenPHP · GitHub Actions
+Laravel 13 · PHP 8.4 · Inertia 3 · Vue 3 · TypeScript · Tailwind 4 · Fortify (2FA e passkeys) · SDK oficial da Anthropic para PHP · PHPUnit 12 · PHPStan · Docker · FrankenPHP · GitHub Actions
 
 ## Licença
 

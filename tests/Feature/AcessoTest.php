@@ -28,6 +28,7 @@ class AcessoTest extends TestCase
             'regras' => ['regras.index'],
             'nova regra' => ['regras.create'],
             'relatórios' => ['relatorios'],
+            'assistente' => ['assistente.index'],
         ];
     }
 

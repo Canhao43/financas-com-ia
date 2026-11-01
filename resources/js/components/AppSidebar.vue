@@ -6,6 +6,7 @@ import {
     FileUp,
     LayoutGrid,
     ListFilter,
+    Sparkles,
     Tags,
     Wallet,
 } from '@lucide/vue';
@@ -22,6 +23,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard, relatorios } from '@/routes';
+import { index as assistente } from '@/routes/assistente';
 import { index as categorias } from '@/routes/categorias';
 import { index as contas } from '@/routes/contas';
 import { index as importacoes } from '@/routes/importacoes';
@@ -34,6 +36,11 @@ const mainNavItems: NavItem[] = [
         title: 'Painel',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Assistente',
+        href: assistente(),
+        icon: Sparkles,
     },
     {
         title: 'Lançamentos',

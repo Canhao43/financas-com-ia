@@ -59,6 +59,19 @@ export type Comparacao = {
     variacao: number | null;
 };
 
+export type MensagemDoAssistente = {
+    id: number;
+    papel: 'usuario' | 'assistente';
+    texto: string;
+    situacao: 'respondida' | 'recusada' | 'limite' | 'erro' | null;
+    /** O que o Claude consultou para responder, em palavras. */
+    consultas: { ferramenta: string; descricao: string; erro: boolean }[];
+    /** Valores da resposta que não saíram de nenhuma consulta. */
+    valoresSemFonte: string[];
+    modelo: string | null;
+    chamadas: number | null;
+};
+
 export type LinhaDoRelatorio = {
     /** null: os lançamentos sem categoria. */
     categoriaId: number | null;

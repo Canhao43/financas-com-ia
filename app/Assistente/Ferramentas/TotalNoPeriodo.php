@@ -2,6 +2,7 @@
 
 namespace App\Assistente\Ferramentas;
 
+use App\Assistente\DescreveEntrada;
 use App\Assistente\EntradaInvalida;
 use App\Assistente\Ferramenta;
 use App\Assistente\Formato;
@@ -16,7 +17,14 @@ use App\Relatorios\TotalDoPeriodo;
  */
 final class TotalNoPeriodo implements Ferramenta
 {
+    use DescreveEntrada;
+
     public function __construct(private TotalDoPeriodo $totais) {}
+
+    public function descrever(array $entrada): string
+    {
+        return 'Total de '.$this->campo($entrada, 'tipo', 'despesas').' de '.$this->periodoDe($entrada).$this->categoriaDe($entrada);
+    }
 
     public function nome(): string
     {
