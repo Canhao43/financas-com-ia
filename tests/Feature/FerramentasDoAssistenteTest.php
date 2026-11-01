@@ -6,7 +6,9 @@ use App\Assistente\CaixaDeFerramentas;
 use App\Models\Categoria;
 use App\Models\Conta;
 use App\Models\Lancamento;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -71,6 +73,43 @@ class FerramentasDoAssistenteTest extends TestCase
         }
         // Mesmos bytes a cada pergunta: é o que deixa o cache do prompt funcionar.
         $this->assertSame(json_encode($definicoes), json_encode(app(CaixaDeFerramentas::class)->definicoes()));
+    }
+
+    /**
+     * "O assistente só lê": cada ferramenta, chamada com uma entrada válida, só faz SELECT no
+     * banco. Uma ferramenta nova precisa entrar nesta lista, senão o teste falha.
+     */
+    public function test_nenhuma_ferramenta_escreve_no_banco(): void
+    {
+        $mercado = Categoria::factory()->create(['nome' => 'Mercado']);
+        $this->lancar(-5000, '2026-10-10', $mercado, 'Mercado do bairro');
+        $entradas = [
+            'resumo_do_mes' => ['mes' => '2026-10'],
+            'total_no_periodo' => ['de' => '2026-09-01', 'ate' => '2026-10-31', 'tipo' => 'despesas', 'categoria' => 'Mercado'],
+            'comparar_periodos' => [
+                'tipo' => 'despesas',
+                'periodo' => ['de' => '2026-10-01', 'ate' => '2026-10-31'],
+                'comparado_com' => ['de' => '2026-09-01', 'ate' => '2026-09-30'],
+            ],
+            'buscar_lancamentos' => ['de' => '2026-10-01', 'ate' => '2026-10-31', 'texto' => 'mercado'],
+            'listar_categorias' => [],
+            'saldos_das_contas' => [],
+        ];
+        $this->assertSame(array_column(app(CaixaDeFerramentas::class)->definicoes(), 'name'), array_keys($entradas));
+
+        $comandos = [];
+        DB::listen(function (QueryExecuted $consulta) use (&$comandos) {
+            $comandos[] = $consulta->sql;
+        });
+
+        foreach ($entradas as $ferramenta => $entrada) {
+            $this->chamar($ferramenta, $entrada);
+        }
+
+        $this->assertNotEmpty($comandos);
+        foreach ($comandos as $sql) {
+            $this->assertMatchesRegularExpression('/^\s*select\b/i', $sql);
+        }
     }
 
     public function test_resumo_do_mes_entrega_o_relatorio_formatado(): void
