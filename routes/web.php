@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssistenteController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ContaController;
 use App\Http\Controllers\DashboardController;
@@ -41,6 +42,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('regras/aplicar', [RegraController::class, 'aplicar'])->name('regras.aplicar');
 
     Route::get('relatorios', RelatorioController::class)->name('relatorios');
+
+    Route::get('assistente', [AssistenteController::class, 'index'])->name('assistente.index');
+    Route::get('assistente/{conversa}', [AssistenteController::class, 'show'])->name('assistente.show');
+    Route::delete('assistente/{conversa}', [AssistenteController::class, 'destroy'])->name('assistente.destroy');
+    // Cada pergunta custa chamadas pagas à API: um teto por minuto protege a conta de um
+    // reenvio em loop.
+    Route::middleware('throttle:10,1')->group(function () {
+        Route::post('assistente', [AssistenteController::class, 'store'])->name('assistente.store');
+        Route::post('assistente/{conversa}', [AssistenteController::class, 'perguntar'])->name('assistente.perguntar');
+    });
 });
 
 require __DIR__.'/settings.php';
