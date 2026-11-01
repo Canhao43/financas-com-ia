@@ -1,0 +1,26 @@
+{
+	skip_install_trust
+	# Sem a API de administração do Caddy escutando dentro do container.
+	admin off
+	frankenphp
+}
+
+# SERVER_NAME é o domínio do app. Com um domínio de verdade, o Caddy pede o certificado ao
+# Let's Encrypt e renova sozinho; com "localhost" (o teste do CI), usa um certificado local.
+{$SERVER_NAME:localhost} {
+	root /app/public
+	encode zstd br gzip
+
+	header {
+		# Depois da primeira visita, o navegador só aceita este site por HTTPS.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		# Nenhum outro site consegue abrir o app dentro de um iframe (clickjacking).
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	php_server
+}
