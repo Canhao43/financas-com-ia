@@ -90,13 +90,17 @@ jobs:
         run: |
           # O backup foi feito antes de existir o registro dele: depois de restaurar, a tabela
           # volta vazia. É a prova de que o banco em uso foi trocado pelo do backup.
-          test "$(docker compose exec -T app php artisan tinker --execute 'echo App\Models\Backup::count();')" = "1"
+          backups() {
+            docker compose exec -T app php -r 'echo (new PDO("sqlite:/dados/financas.sqlite"))->query("select count(*) from backups")->fetchColumn();'
+          }
+          docker compose exec -T app php artisan tinker --execute 'echo App\Models\Backup::count();' | cat -A || true
+          test "$(backups)" = "1"
           cp restaurado.sqlite financas.sqlite
           docker compose stop
           docker compose run --rm --no-deps -T agendador \
             sh -c 'rm -f /dados/financas.sqlite-wal /dados/financas.sqlite-shm && cat > /dados/financas.sqlite' < financas.sqlite
           docker compose up -d --wait
-          test "$(docker compose exec -T app php artisan tinker --execute 'echo App\Models\Backup::count();')" = "0"
+          test "$(backups)" = "0"
           # E o app continua conseguindo escrever no banco restaurado.
           docker compose exec -T agendador php artisan backup:criar
 
