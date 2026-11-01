@@ -1,0 +1,38 @@
+# Produção: o site e o agendador, da mesma imagem. Passo a passo em docs/deploy.md.
+name: financas
+
+x-app: &app
+    # IMAGEM e VERSAO existem para o teste do CI e para voltar a uma versão anterior
+    # (VERSAO=sha-1a2b3c4). No dia a dia, ficam no padrão.
+    image: ${IMAGEM:-ghcr.io/canhao43/financas-com-ia}:${VERSAO:-latest}
+    env_file: .env
+    restart: unless-stopped
+    # O driver "local" gira os arquivos de log sozinho; o padrão do Docker cresce até encher o disco.
+    logging:
+        driver: local
+
+services:
+    app:
+        <<: *app
+        ports:
+            - '80:80'
+            - '443:443'
+            - '443:443/udp'
+        volumes:
+            # Banco, backups locais e configuração do rclone.
+            - dados:/dados
+            # Certificados do Let's Encrypt: sem isso, cada recriação do container pediria um novo.
+            - caddy:/data/caddy
+
+    agendador:
+        <<: *app
+        command: ['php', 'artisan', 'schedule:work']
+        volumes:
+            - dados:/dados
+        # A checagem da imagem testa o site, que não roda aqui.
+        healthcheck:
+            disable: true
+
+volumes:
+    dados:
+    caddy:
