@@ -112,7 +112,8 @@ function confirmarImportacao() {
                             {{ linha.descricao }}
                         </span>
                         <span class="block text-sm text-muted-foreground">
-                            {{ formatarData(linha.data) }}
+                            {{ formatarData(linha.data) }} ·
+                            {{ linha.categoria ?? 'Sem categoria' }}
                         </span>
                     </span>
                     <span

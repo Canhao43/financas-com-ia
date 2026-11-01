@@ -45,5 +45,7 @@ export type LinhaDaPrevia = {
     descricao: string;
     valor: number;
     situacao: SituacaoDaLinha;
+    /** A categoria que as regras dão, se a linha for importada como nova. */
+    categoria: string | null;
     parecidoCom: LancamentoResumido | null;
 };
