@@ -40,7 +40,9 @@ class SeedersTest extends TestCase
         $this->seed(DemonstracaoSeeder::class);
 
         $this->assertSame(2, Conta::query()->count());
-        $this->assertSame(21, Lancamento::query()->count());
+        $this->assertSame(27, Lancamento::query()->count());
+        // O pagamento da fatura sai de uma conta e entra na outra: as duas pontas existem.
+        $this->assertSame(0, (int) Lancamento::query()->whereRelation('categoria', 'tipo', 'transferencia')->sum('valor'));
         $this->assertSame(0, User::query()->count());
     }
 

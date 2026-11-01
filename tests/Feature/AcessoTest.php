@@ -27,6 +27,7 @@ class AcessoTest extends TestCase
             'importar extrato' => ['importacoes.create'],
             'regras' => ['regras.index'],
             'nova regra' => ['regras.create'],
+            'relatórios' => ['relatorios'],
         ];
     }
 

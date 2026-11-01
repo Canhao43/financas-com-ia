@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportacaoController;
 use App\Http\Controllers\LancamentoController;
 use App\Http\Controllers\RegraController;
+use App\Http\Controllers\RelatorioController;
 use Illuminate\Support\Facades\Route;
 
 // App pessoal: a raiz leva direto ao painel (ou ao login, para quem não entrou).
@@ -38,6 +39,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->except('show')
         ->parameters(['regras' => 'regra']);
     Route::post('regras/aplicar', [RegraController::class, 'aplicar'])->name('regras.aplicar');
+
+    Route::get('relatorios', RelatorioController::class)->name('relatorios');
 });
 
 require __DIR__.'/settings.php';

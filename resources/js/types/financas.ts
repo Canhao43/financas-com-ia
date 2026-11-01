@@ -51,3 +51,21 @@ export type LinhaDaPrevia = {
     categoria: string | null;
     parecidoCom: LancamentoResumido | null;
 };
+
+/** Valores em centavos, com sinal; variação em pontos-base (1234 = 12,34%), null sem base. */
+export type Comparacao = {
+    atual: number;
+    anterior: number;
+    variacao: number | null;
+};
+
+export type LinhaDoRelatorio = {
+    /** null: os lançamentos sem categoria. */
+    categoriaId: number | null;
+    nome: string;
+    total: number;
+    anterior: number;
+    variacao: number | null;
+    /** Quanto a linha é do total do grupo, em pontos-base. */
+    participacao: number;
+};

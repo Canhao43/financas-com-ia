@@ -7,6 +7,7 @@ use App\Models\Categoria;
 use App\Models\Conta;
 use App\Models\Lancamento;
 use App\Support\Dinheiro;
+use App\Support\Mes;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,13 +18,19 @@ class LancamentoController extends Controller
 {
     public function index(Request $request): Response
     {
-        $mes = $this->mes($request->string('mes')->toString());
+        $mes = Mes::doTexto($request->string('mes')->toString());
         $contaId = $request->integer('conta') ?: null;
+        // Vem do relatório: o id da categoria, ou "sem" para os lançamentos sem categoria.
+        $filtro = $request->string('categoria')->toString();
+        $categoria = ctype_digit($filtro) ? Categoria::query()->find((int) $filtro) : null;
+        $semCategoria = $filtro === 'sem';
 
         $lancamentos = Lancamento::query()
             ->with(['conta:id,nome', 'categoria:id,nome'])
             ->doMes($mes)
             ->when($contaId, fn ($query) => $query->where('conta_id', $contaId))
+            ->when($categoria, fn ($query, Categoria $categoria) => $query->where('categoria_id', $categoria->id))
+            ->when($semCategoria, fn ($query) => $query->whereNull('categoria_id'))
             ->orderByDesc('data')
             ->orderByDesc('id')
             ->get();
@@ -33,6 +40,11 @@ class LancamentoController extends Controller
             'mesAnterior' => $mes->subMonthNoOverflow()->format('Y-m'),
             'mesSeguinte' => $mes->addMonthNoOverflow()->format('Y-m'),
             'contaId' => $contaId,
+            'categoria' => match (true) {
+                $categoria !== null => ['filtro' => (string) $categoria->id, 'nome' => $categoria->nome],
+                $semCategoria => ['filtro' => 'sem', 'nome' => 'Sem categoria'],
+                default => null,
+            },
             'contas' => Conta::query()->orderBy('nome')->get(['id', 'nome']),
             'lancamentos' => $lancamentos->map(fn (Lancamento $lancamento) => [
                 'id' => $lancamento->id,
@@ -103,16 +115,6 @@ class LancamentoController extends Controller
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Lançamento excluído.']);
 
         return to_route('lancamentos.index', ['mes' => $mes]);
-    }
-
-    /**
-     * O mês pedido em "AAAA-MM"; qualquer outra coisa vira o mês atual.
-     */
-    private function mes(string $texto): CarbonImmutable
-    {
-        return preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $texto)
-            ? CarbonImmutable::createFromFormat('!Y-m', $texto)
-            : CarbonImmutable::today()->startOfMonth();
     }
 
     /**

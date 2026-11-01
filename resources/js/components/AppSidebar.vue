@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import {
     ArrowLeftRight,
+    ChartColumn,
     FileUp,
     LayoutGrid,
     ListFilter,
@@ -20,7 +21,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, relatorios } from '@/routes';
 import { index as categorias } from '@/routes/categorias';
 import { index as contas } from '@/routes/contas';
 import { index as importacoes } from '@/routes/importacoes';
@@ -38,6 +39,11 @@ const mainNavItems: NavItem[] = [
         title: 'Lançamentos',
         href: lancamentos(),
         icon: ArrowLeftRight,
+    },
+    {
+        title: 'Relatórios',
+        href: relatorios(),
+        icon: ChartColumn,
     },
     {
         title: 'Importações',

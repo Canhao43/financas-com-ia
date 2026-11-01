@@ -21,6 +21,17 @@ export function nomeDoMes(anoMes: string): string {
 }
 
 /**
+ * "2026-09" para "setembro", para frases como "em setembro".
+ */
+export function mesPorExtenso(anoMes: string): string {
+    const [ano, mes] = anoMes.split('-').map(Number);
+
+    return new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(
+        new Date(ano, mes - 1, 1),
+    );
+}
+
+/**
  * O período do extrato, quando o banco informa: "01/10/2026 a 31/10/2026".
  */
 export function formatarPeriodo(

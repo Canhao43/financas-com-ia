@@ -5,25 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\Backup;
 use App\Models\Conta;
 use App\Models\Lancamento;
+use App\Relatorios\RelatorioMensal;
 use Carbon\CarbonImmutable;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(RelatorioMensal $relatorios): Response
     {
         $mes = CarbonImmutable::today()->startOfMonth();
-        // Transferência entre contas não é receita nem despesa: o saldo total não muda com ela.
-        $doMes = Lancamento::query()->doMes($mes)->semTransferencias();
+        // Os mesmos totais do relatório, pela mesma conta: sem transferências entre contas.
+        $totais = $relatorios->totais($mes);
 
         return Inertia::render('Dashboard', [
             'mes' => $mes->format('Y-m'),
             // Saldo de todas as contas ativas: inicial mais lançamentos, somado aqui.
             'saldoTotal' => Conta::query()->where('arquivada', false)->comSaldo()->get()
                 ->sum(fn (Conta $conta) => $conta->saldoAtual()),
-            'receitasDoMes' => (int) (clone $doMes)->where('valor', '>', 0)->sum('valor'),
-            'despesasDoMes' => (int) (clone $doMes)->where('valor', '<', 0)->sum('valor'),
+            'receitasDoMes' => $totais['receitas'],
+            'despesasDoMes' => $totais['despesas'],
             'ultimos' => Lancamento::query()->with('categoria:id,nome')->orderByDesc('data')->orderByDesc('id')->limit(5)->get()
                 ->map(fn (Lancamento $lancamento) => [
                     'id' => $lancamento->id,

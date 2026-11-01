@@ -30,16 +30,24 @@ class DemonstracaoSeeder extends Seeder
 
         $categoria = fn (string $nome, TipoCategoria $tipo) => Categoria::query()->where(['nome' => $nome, 'tipo' => $tipo])->value('id');
 
+        // Mercado e restaurante mudam de um mês para o outro, para o relatório ter o que comparar.
+        $mercado = [2 => -55010, 1 => -62345, 0 => -71890];
+        $restaurante = [2 => -9800, 1 => -14250, 0 => -12100];
+
         foreach ([2, 1, 0] as $mesesAtras) {
             $mes = CarbonImmutable::now()->subMonthsNoOverflow($mesesAtras)->startOfMonth();
+            // A fatura do cartão é paga pela conta corrente: transferência, não despesa.
+            $fatura = 62345 + 5590 + 14250;
 
             $lancamentos = [
                 [$corrente, 5, 'Salário', 'Salário', TipoCategoria::Receita, 650000],
                 [$corrente, 6, 'Aluguel', 'Moradia', TipoCategoria::Despesa, -180000],
-                [$cartao, 8, 'Supermercado', 'Mercado', TipoCategoria::Despesa, -62345],
+                [$cartao, 8, 'Supermercado', 'Mercado', TipoCategoria::Despesa, $mercado[$mesesAtras]],
+                [$corrente, 10, 'Pagamento da fatura', 'Transferência entre contas', TipoCategoria::Transferencia, -$fatura],
+                [$cartao, 10, 'Pagamento recebido', 'Transferência entre contas', TipoCategoria::Transferencia, $fatura],
                 [$cartao, 12, 'Streaming', 'Assinaturas', TipoCategoria::Despesa, -5590],
                 [$corrente, 15, 'Farmácia', 'Saúde', TipoCategoria::Despesa, -8790],
-                [$cartao, 20, 'Restaurante', 'Alimentação fora', TipoCategoria::Despesa, -14250],
+                [$cartao, 20, 'Restaurante', 'Alimentação fora', TipoCategoria::Despesa, $restaurante[$mesesAtras]],
                 [$corrente, 25, 'Transporte por aplicativo', 'Transporte', TipoCategoria::Despesa, -6430],
             ];
 
