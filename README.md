@@ -37,7 +37,7 @@ Verificações (as mesmas do CI): `composer ci:check` — lint, checagem de tipo
 
 ## Produção
 
-Uma imagem Docker com FrankenPHP (HTTPS automático pelo Caddy) e SQLite, publicada no GHCR a cada merge — depois de o CI subi-la como em produção e testar de fora, inclusive fazer e restaurar um backup. Passo a passo em [`docs/deploy.md`](docs/deploy.md).
+Uma imagem Docker com FrankenPHP (HTTPS automático pelo Caddy) e SQLite, publicada no GHCR a cada merge — depois de o CI subi-la como em produção e testar de fora, inclusive fazer e restaurar um backup. Roda de graça: uma VM do Always Free da Oracle Cloud e um subdomínio do DuckDNS. Passo a passo em [`docs/deploy.md`](docs/deploy.md).
 
 ## Princípios
 
