@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TipoConta;
+use Carbon\CarbonImmutable;
 use Database\Factories\ContaFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,5 +62,25 @@ class Conta extends Model
             : $this->lancamentos()->sum('valor');
 
         return $this->saldo_inicial + (int) $soma;
+    }
+
+    /**
+     * Saldo no fim do dia: o que o banco informa no extrato, para comparar.
+     */
+    public function saldoEm(CarbonImmutable $dia): int
+    {
+        // "Menor que o dia seguinte", e não "até o dia": no SQLite a data é texto com hora,
+        // e "2026-10-31 00:00:00" <= "2026-10-31" é falso.
+        $soma = $this->lancamentos()->where('data', '<', $dia->addDay()->toDateString())->sum('valor');
+
+        return $this->saldo_inicial + (int) $soma;
+    }
+
+    /**
+     * @return HasMany<Importacao, $this>
+     */
+    public function importacoes(): HasMany
+    {
+        return $this->hasMany(Importacao::class);
     }
 }

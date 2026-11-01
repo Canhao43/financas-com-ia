@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrigemLancamento;
 use Carbon\CarbonImmutable;
 use Database\Factories\LancamentoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// Só o que o formulário edita. Origem e vínculo com a importação quem grava é o importador.
 #[Fillable(['conta_id', 'categoria_id', 'data', 'descricao', 'valor'])]
 class Lancamento extends Model
 {
@@ -17,6 +19,13 @@ class Lancamento extends Model
     use HasFactory;
 
     protected $table = 'lancamentos';
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'origem' => 'manual',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -28,6 +37,7 @@ class Lancamento extends Model
         return [
             'data' => 'immutable_date',
             'valor' => 'integer',
+            'origem' => OrigemLancamento::class,
         ];
     }
 
@@ -45,6 +55,14 @@ class Lancamento extends Model
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class);
+    }
+
+    /**
+     * @return BelongsTo<Importacao, $this>
+     */
+    public function importacao(): BelongsTo
+    {
+        return $this->belongsTo(Importacao::class);
     }
 
     /**
