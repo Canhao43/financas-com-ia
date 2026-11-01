@@ -46,6 +46,17 @@ class CategoriaTest extends TestCase
         $this->assertDatabaseCount('categorias', 2);
     }
 
+    public function test_cria_categoria_de_transferencia(): void
+    {
+        $this->post(route('categorias.store'), ['nome' => 'Poupança', 'tipo' => 'transferencia'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(TipoCategoria::Transferencia, Categoria::query()->sole()->tipo);
+
+        $this->get(route('categorias.index'))
+            ->assertInertia(fn (Assert $page) => $page->where('categorias.0.tipo', 'transferencia'));
+    }
+
     public function test_edita_mantendo_o_proprio_nome(): void
     {
         $categoria = Categoria::factory()->create(['nome' => 'Farmácia']);

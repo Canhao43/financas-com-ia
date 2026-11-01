@@ -35,9 +35,12 @@ class SalvarLancamentoRequest extends FormRequest
                 ->where('arquivada', false)
                 ->when($this->lancamentoEditado(), fn (Builder $query, Lancamento $editado) => $query
                     ->orWhere('id', $editado->conta_id)))],
-            // Saída só com categoria de despesa; entrada, de receita.
+            // Saída só com categoria de despesa; entrada, de receita; transferência, as duas.
             'categoria_id' => ['nullable', 'integer', Rule::exists('categorias', 'id')
-                ->where('tipo', TipoCategoria::daDirecao((string) $this->input('direcao'))->value)],
+                ->whereIn('tipo', array_map(
+                    fn (TipoCategoria $tipo) => $tipo->value,
+                    TipoCategoria::daDirecao((string) $this->input('direcao')),
+                ))],
         ];
     }
 
@@ -48,7 +51,7 @@ class SalvarLancamentoRequest extends FormRequest
     {
         return [
             'conta_id.exists' => 'Escolha uma conta ativa.',
-            'categoria_id.exists' => 'Use categoria de despesa para saídas e de receita para entradas.',
+            'categoria_id.exists' => 'Use categoria de despesa para saídas e de receita para entradas (transferência serve para as duas).',
             'data.date_format' => 'Informe uma data válida.',
         ];
     }

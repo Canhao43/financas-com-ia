@@ -2,7 +2,6 @@
 
 namespace App\Regras;
 
-use App\Enums\TipoCategoria;
 use App\Models\Categoria;
 use App\Models\Regra;
 use App\Support\Texto;
@@ -22,10 +21,10 @@ final class Categorizador
     public function categoriaPara(string $descricao, int $valor): ?Categoria
     {
         $descricao = Texto::normalizar($descricao);
-        $tipo = TipoCategoria::daDirecao($valor > 0 ? 'entrada' : 'saida');
+        $direcao = $valor > 0 ? 'entrada' : 'saida';
 
         foreach ($this->regras() as $regra) {
-            if ($regra->categoria->tipo === $tipo && str_contains($descricao, $regra->texto)) {
+            if (in_array($direcao, $regra->categoria->tipo->direcoes(), true) && str_contains($descricao, $regra->texto)) {
                 return $regra->categoria;
             }
         }

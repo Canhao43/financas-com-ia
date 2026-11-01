@@ -9,8 +9,9 @@ import NativeSelect from '@/components/NativeSelect.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { tiposDeCategoria } from '@/lib/categorias';
 import { index } from '@/routes/regras';
-import type { Opcao } from '@/types';
+import type { Opcao, TipoCategoria } from '@/types';
 
 defineOptions({
     layout: {
@@ -25,7 +26,7 @@ defineOptions({
 
 const props = defineProps<{
     regra: { id: number; texto: string; categoria_id: number } | null;
-    categorias: (Opcao & { tipo: 'despesa' | 'receita' })[];
+    categorias: (Opcao & { tipo: TipoCategoria })[];
 }>();
 
 const titulo = props.regra ? 'Editar regra' : 'Nova regra';
@@ -36,16 +37,12 @@ const acao = props.regra
 
 const categoriaId = ref(String(props.regra?.categoria_id ?? ''));
 
-const grupos = computed(() => [
-    {
-        rotulo: 'Despesas',
-        categorias: props.categorias.filter((c) => c.tipo === 'despesa'),
-    },
-    {
-        rotulo: 'Receitas',
-        categorias: props.categorias.filter((c) => c.tipo === 'receita'),
-    },
-]);
+const grupos = computed(() =>
+    tiposDeCategoria.map((tipo) => ({
+        rotulo: tipo.plural,
+        categorias: props.categorias.filter((c) => c.tipo === tipo.valor),
+    })),
+);
 </script>
 
 <template>
@@ -54,7 +51,7 @@ const grupos = computed(() => [
     <div class="mx-auto flex w-full max-w-xl flex-col gap-6 p-4">
         <Heading
             :title="titulo"
-            description="Maiúsculas e acentos não importam. Regra de despesa vale só para saídas; de receita, só para entradas. Se mais de uma combinar, vale a de texto mais longo."
+            description="Maiúsculas e acentos não importam. Regra de despesa vale só para saídas; de receita, só para entradas; de transferência, para as duas. Se mais de uma combinar, vale a de texto mais longo."
         />
 
         <Form v-bind="acao" class="space-y-6" v-slot="{ errors, processing }">

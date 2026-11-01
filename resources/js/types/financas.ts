@@ -1,5 +1,7 @@
 export type Direcao = 'entrada' | 'saida';
 
+export type TipoCategoria = 'despesa' | 'receita' | 'transferencia';
+
 export type Opcao = {
     id: number;
     nome: string;

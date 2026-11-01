@@ -5,7 +5,9 @@ import RegraController from '@/actions/App/Http/Controllers/RegraController';
 import Heading from '@/components/Heading.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { rotuloDoTipo } from '@/lib/categorias';
 import { create, edit, index } from '@/routes/regras';
+import type { TipoCategoria } from '@/types';
 
 defineOptions({
     layout: {
@@ -23,7 +25,7 @@ defineProps<{
         id: number;
         texto: string;
         categoria: string;
-        tipo: 'despesa' | 'receita';
+        tipo: TipoCategoria;
     }[];
     semCategoria: number;
 }>();
@@ -89,7 +91,7 @@ defineProps<{
                 <span class="flex shrink-0 items-center gap-2 text-sm">
                     {{ regra.categoria }}
                     <Badge variant="outline">
-                        {{ regra.tipo === 'receita' ? 'Receita' : 'Despesa' }}
+                        {{ rotuloDoTipo(regra.tipo) }}
                     </Badge>
                 </span>
             </Link>

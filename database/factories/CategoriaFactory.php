@@ -28,4 +28,9 @@ class CategoriaFactory extends Factory
     {
         return $this->state(['tipo' => TipoCategoria::Receita]);
     }
+
+    public function transferencia(): static
+    {
+        return $this->state(['tipo' => TipoCategoria::Transferencia]);
+    }
 }
