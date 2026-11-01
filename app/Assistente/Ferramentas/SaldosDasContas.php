@@ -16,6 +16,11 @@ final class SaldosDasContas implements Ferramenta
         return 'saldos_das_contas';
     }
 
+    public function descrever(array $entrada): string
+    {
+        return 'Saldos das contas';
+    }
+
     public function definicao(): array
     {
         return [

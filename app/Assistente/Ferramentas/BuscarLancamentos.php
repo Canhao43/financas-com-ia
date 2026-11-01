@@ -2,6 +2,7 @@
 
 namespace App\Assistente\Ferramentas;
 
+use App\Assistente\DescreveEntrada;
 use App\Assistente\Ferramenta;
 use App\Assistente\Formato;
 use App\Assistente\LeitorDeEntrada;
@@ -16,6 +17,16 @@ use Illuminate\Database\Eloquent\Builder;
  */
 final class BuscarLancamentos implements Ferramenta
 {
+    use DescreveEntrada;
+
+    public function descrever(array $entrada): string
+    {
+        $texto = $entrada['texto'] ?? null;
+
+        return 'Lançamentos de '.$this->periodoDe($entrada).$this->categoriaDe($entrada)
+            .(is_string($texto) && trim($texto) !== '' ? ', com "'.trim($texto).'"' : '');
+    }
+
     public function nome(): string
     {
         return 'buscar_lancamentos';

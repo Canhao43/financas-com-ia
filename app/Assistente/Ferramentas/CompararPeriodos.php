@@ -2,6 +2,7 @@
 
 namespace App\Assistente\Ferramentas;
 
+use App\Assistente\DescreveEntrada;
 use App\Assistente\EntradaInvalida;
 use App\Assistente\Ferramenta;
 use App\Assistente\Formato;
@@ -17,7 +18,18 @@ use App\Relatorios\TotalDoPeriodo;
  */
 final class CompararPeriodos implements Ferramenta
 {
+    use DescreveEntrada;
+
     public function __construct(private TotalDoPeriodo $totais) {}
+
+    public function descrever(array $entrada): string
+    {
+        $periodo = is_array($entrada['periodo'] ?? null) ? $entrada['periodo'] : [];
+        $comparado = is_array($entrada['comparado_com'] ?? null) ? $entrada['comparado_com'] : [];
+
+        return 'Comparação de '.$this->campo($entrada, 'tipo', 'despesas').': '.$this->periodoDe($periodo)
+            .' com '.$this->periodoDe($comparado).$this->categoriaDe($entrada);
+    }
 
     public function nome(): string
     {

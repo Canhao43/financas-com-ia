@@ -2,6 +2,7 @@
 
 namespace App\Assistente\Ferramentas;
 
+use App\Assistente\DescreveEntrada;
 use App\Assistente\Ferramenta;
 use App\Assistente\Formato;
 use App\Assistente\LeitorDeEntrada;
@@ -13,7 +14,16 @@ use App\Relatorios\RelatorioMensal;
  */
 final class ResumoDoMes implements Ferramenta
 {
+    use DescreveEntrada;
+
     public function __construct(private RelatorioMensal $relatorios) {}
+
+    public function descrever(array $entrada): string
+    {
+        $mes = $this->campo($entrada, 'mes');
+
+        return 'Resumo de '.(preg_match('/^(\d{4})-(\d{2})$/', $mes, $partes) ? "{$partes[2]}/{$partes[1]}" : $mes);
+    }
 
     public function nome(): string
     {

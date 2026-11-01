@@ -16,6 +16,11 @@ final class ListarCategorias implements Ferramenta
         return 'listar_categorias';
     }
 
+    public function descrever(array $entrada): string
+    {
+        return 'Lista de categorias';
+    }
+
     public function definicao(): array
     {
         return [
