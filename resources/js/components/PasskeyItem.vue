@@ -50,10 +50,10 @@ const handleDelete = () => {
                     </span>
                 </div>
                 <p class="text-sm text-muted-foreground">
-                    Added {{ passkey.created_at_diff }}
+                    Adicionada {{ passkey.created_at_diff }}
                     <template v-if="passkey.last_used_at_diff">
                         <span class="mx-1 text-muted-foreground/50">/</span>
-                        Last used {{ passkey.last_used_at_diff }}
+                        Último uso {{ passkey.last_used_at_diff }}
                     </template>
                 </p>
             </div>
@@ -74,8 +74,8 @@ const handleDelete = () => {
             <DialogContent>
                 <DialogTitle>Remover passkey</DialogTitle>
                 <DialogDescription>
-                    Are you sure you want to remove the "{{ passkey.name }}"
-                    passkey? You will no longer be able to use it to sign in.
+                    Remover a passkey "{{ passkey.name }}"? Ela não vai mais
+                    servir para entrar no app.
                 </DialogDescription>
                 <DialogFooter class="gap-2">
                     <DialogClose as-child>
