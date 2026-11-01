@@ -28,3 +28,4 @@ Este projeto é construído com agentes de IA (Claude Code) e revisado por mim, 
 - Teste junto com a funcionalidade. `composer ci:check` precisa passar (lint, tipos, PHPStan, testes).
 - Toda tela funciona no celular: o app é usado pelo navegador do telefone.
 - Comentário explica o porquê, não o quê.
+- Escolha de arquitetura entre alternativas reais vira uma decisão em `docs/decisoes/`, no mesmo modelo das outras e apontando o teste que a prova. Decisão que mudou ganha texto novo, não é apagada.
