@@ -5,6 +5,7 @@ use App\Http\Controllers\ContaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportacaoController;
 use App\Http\Controllers\LancamentoController;
+use App\Http\Controllers\RegraController;
 use Illuminate\Support\Facades\Route;
 
 // App pessoal: a raiz leva direto ao painel (ou ao login, para quem não entrou).
@@ -32,6 +33,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->parameters(['importacoes' => 'importacao']);
     Route::post('importacoes/{importacao}/confirmar', [ImportacaoController::class, 'confirmar'])
         ->name('importacoes.confirmar');
+
+    Route::resource('regras', RegraController::class)
+        ->except('show')
+        ->parameters(['regras' => 'regra']);
+    Route::post('regras/aplicar', [RegraController::class, 'aplicar'])->name('regras.aplicar');
 });
 
 require __DIR__.'/settings.php';

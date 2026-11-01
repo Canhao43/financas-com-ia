@@ -9,6 +9,7 @@ use App\Models\Conta;
 use App\Models\Importacao;
 use App\Models\Lancamento;
 use App\Ofx\Extrato;
+use App\Regras\Categorizador;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\DB;
  */
 final class Importador
 {
-    public function __construct(private readonly Conciliador $conciliador) {}
+    public function __construct(
+        private readonly Conciliador $conciliador,
+        private readonly Categorizador $categorizador,
+    ) {}
 
     /**
      * Guarda as linhas lidas, não o arquivo. Uma prévia por vez: a anterior, não confirmada, sai.
@@ -106,7 +110,8 @@ final class Importador
     {
         (new Lancamento([
             'conta_id' => $importacao->conta_id,
-            'categoria_id' => null,
+            // O vinculado fica com a categoria que a pessoa escolheu; só o criado aqui passa pelas regras.
+            'categoria_id' => $this->categorizador->categoriaPara($linha->descricao, $linha->valor)?->id,
             'data' => $linha->data->toDateString(),
             'descricao' => $linha->descricao,
             'valor' => $linha->valor,

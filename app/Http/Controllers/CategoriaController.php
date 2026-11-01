@@ -45,6 +45,7 @@ class CategoriaController extends Controller
                 'nome' => $categoria->nome,
                 'tipo' => $categoria->tipo->value,
                 'lancamentos' => $categoria->lancamentos()->count(),
+                'regras' => $categoria->regras()->count(),
             ],
         ]);
     }

@@ -28,6 +28,7 @@ const props = defineProps<{
         nome: string;
         tipo: 'despesa' | 'receita';
         lancamentos: number;
+        regras: number;
     } | null;
 }>();
 
@@ -47,9 +48,16 @@ const tipo = ref<string>(props.categoria?.tipo ?? 'despesa');
 // Com lançamentos, o tipo fica fixo (o servidor também recusa a troca).
 const tipoTravado = (props.categoria?.lancamentos ?? 0) > 0;
 
-const avisoDeExclusao = props.categoria?.lancamentos
-    ? `Os lançamentos dela (${props.categoria.lancamentos}) continuam existindo, sem categoria.`
-    : 'Nenhum lançamento usa esta categoria.';
+const avisoDeExclusao = [
+    props.categoria?.lancamentos
+        ? `Os lançamentos dela (${props.categoria.lancamentos}) continuam existindo, sem categoria.`
+        : 'Nenhum lançamento usa esta categoria.',
+    props.categoria?.regras
+        ? `As regras que apontam para ela (${props.categoria.regras}) são excluídas junto.`
+        : '',
+]
+    .filter(Boolean)
+    .join(' ');
 </script>
 
 <template>

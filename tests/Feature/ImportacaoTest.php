@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\Conta;
 use App\Models\Importacao;
 use App\Models\Lancamento;
+use App\Models\Regra;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -239,6 +240,8 @@ class ImportacaoTest extends TestCase
             'descricao' => 'Mercado da semana',
             'categoria_id' => $mercado->id,
         ]);
+        // Uma regra que daria outra categoria: no vinculado, vale a escolha da pessoa.
+        Regra::query()->create(['texto' => 'SUPERMERCADO', 'categoria_id' => Categoria::factory()->create()->id]);
 
         $importacao = $this->enviar([['2026-10-11', '-50.00', 'SUPERMERCADO X', 'F1']]);
 
@@ -263,6 +266,34 @@ class ImportacaoTest extends TestCase
         $this->assertSame('F1', $manual->id_externo);
 
         $this->assertSame(['ja_existe'], $this->situacoesDaPrevia($this->enviar([['2026-10-11', '-50.00', 'SUPERMERCADO X', 'F1']])));
+    }
+
+    public function test_as_regras_categorizam_o_que_a_importacao_cria(): void
+    {
+        $padaria = Categoria::factory()->create(['nome' => 'Padaria']);
+        $salario = Categoria::factory()->receita()->create(['nome' => 'Salário']);
+        Regra::query()->create(['texto' => 'PADARIA', 'categoria_id' => $padaria->id]);
+        Regra::query()->create(['texto' => 'EMPRESA', 'categoria_id' => $salario->id]);
+
+        $importacao = $this->enviar([
+            ['2026-10-05', '6500.00', 'PAGTO EMPRESA FICTICIA', 'F1'],
+            ['2026-10-10', '-12.50', 'Padaria São João', 'F2'],
+            ['2026-10-11', '12.50', 'ESTORNO PADARIA SAO JOAO', 'F3'],
+        ]);
+
+        // A prévia já mostra a categoria que cada linha vai receber.
+        $this->get(route('importacoes.show', $importacao))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('linhas.0.categoria', 'Salário')
+                ->where('linhas.1.categoria', 'Padaria')
+                ->where('linhas.2.categoria', null));
+
+        $this->confirmar($importacao);
+
+        $this->assertSame(
+            ['F1' => $salario->id, 'F2' => $padaria->id, 'F3' => null],
+            Lancamento::query()->orderBy('id_externo')->pluck('categoria_id', 'id_externo')->all(),
+        );
     }
 
     public function test_parecido_so_com_o_mesmo_valor_dentro_da_janela_e_o_mais_perto(): void

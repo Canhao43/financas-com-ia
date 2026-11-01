@@ -36,4 +36,12 @@ class Categoria extends Model
     {
         return $this->hasMany(Lancamento::class);
     }
+
+    /**
+     * @return HasMany<Regra, $this>
+     */
+    public function regras(): HasMany
+    {
+        return $this->hasMany(Regra::class);
+    }
 }
