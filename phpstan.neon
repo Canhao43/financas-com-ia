@@ -11,3 +11,6 @@ parameters:
         - routes/
 
     level: 7
+
+    # Lê o corpo do casts() dos models: sem isso, enum e data viram string para a análise.
+    parseModelCastsMethod: true
