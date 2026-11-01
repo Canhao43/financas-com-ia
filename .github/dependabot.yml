@@ -10,3 +10,16 @@ updates:
       github-actions:
         patterns:
           - "*"
+
+  # As imagens base do Dockerfile são fixadas por hash; sem isto, a correção de segurança do
+  # PHP ou do Debian nunca chegaria à imagem.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 5
+    groups:
+      docker:
+        patterns:
+          - "*"

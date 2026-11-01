@@ -1,0 +1,134 @@
+name: imagem
+
+# Monta a imagem de produção, sobe como no servidor e testa por fora. No main, publica
+# no GHCR exatamente a imagem que passou no teste.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  imagem:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # O compose de produção, apontado para a imagem recém-montada.
+      IMAGEM: financas
+      VERSAO: teste
+    defaults:
+      run:
+        working-directory: deploy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Monta a imagem
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          tags: financas:teste
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Sobe como em produção
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq age sqlite3 > /dev/null
+          age-keygen -o chave.txt 2> /dev/null
+          {
+            echo "APP_KEY=$(docker run --rm financas:teste php artisan key:generate --show)"
+            echo "SERVER_NAME=localhost"
+            echo "APP_URL=https://localhost"
+            echo "BACKUP_CHAVE_PUBLICA=$(age-keygen -y chave.txt)"
+            # O rclone aceita uma pasta local como destino: aqui ela faz o papel do Google Drive.
+            echo "BACKUP_DESTINO=/dados/destino-de-teste"
+          } > .env
+          docker compose up -d --wait
+
+      - name: O site responde por HTTPS, com os cabeçalhos de segurança
+        run: |
+          curl -kfsS https://localhost/up > /dev/null
+          curl -kfsS -D cabecalhos.txt -o login.html https://localhost/login
+          grep -Eq 'auth(\\/|/)Login' login.html
+          grep -qi '^strict-transport-security:' cabecalhos.txt
+          grep -qi '^x-frame-options: DENY' cabecalhos.txt
+          if grep -qi '^x-powered-by:' cabecalhos.txt; then echo "O PHP anuncia a versão"; exit 1; fi
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost/login)" = "308"
+          test "$(curl -ks -o /dev/null -w '%{http_code}' https://localhost/register)" = "404"
+
+      - name: O banco foi migrado na subida
+        run: docker compose exec -T app php artisan migrate:status | grep 'create_backups_table' | grep -q 'Ran'
+
+      - name: Backup de verdade, e a volta dele
+        run: |
+          docker compose exec -T agendador php artisan backup:criar
+          arquivo=$(docker compose exec -T agendador ls /dados/destino-de-teste)
+          docker compose cp "agendador:/dados/destino-de-teste/$arquivo" backup.age
+          # O que sai do servidor está cifrado...
+          head -c 21 backup.age | grep -q 'age-encryption.org/v1'
+          # ...e a chave privada abre um banco inteiro, com as tabelas do app.
+          age -d -i chave.txt -o restaurado.sqlite backup.age
+          test "$(sqlite3 restaurado.sqlite 'pragma integrity_check')" = "ok"
+          test "$(sqlite3 restaurado.sqlite 'select count(*) from migrations')" -gt 0
+          docker compose exec -T agendador php artisan schedule:list | grep -q 'backup:criar'
+
+      - name: Restaura com os comandos do docs/deploy.md
+        run: |
+          # O backup foi feito antes de existir o registro dele: depois de restaurar, a tabela
+          # volta vazia. É a prova de que o banco em uso foi trocado pelo do backup.
+          backups() {
+            docker compose exec -T app php -r 'echo (new PDO("sqlite:/dados/financas.sqlite"))->query("select count(*) from backups")->fetchColumn();'
+          }
+          test "$(backups)" = "1"
+          cp restaurado.sqlite financas.sqlite
+          docker compose stop
+          docker compose run --rm --no-deps -T agendador \
+            sh -c 'rm -f /dados/financas.sqlite-wal /dados/financas.sqlite-shm && cat > /dados/financas.sqlite' < financas.sqlite
+          docker compose up -d --wait
+          test "$(backups)" = "0"
+          # E o app continua conseguindo escrever no banco restaurado.
+          docker compose exec -T agendador php artisan backup:criar
+
+      - name: Troca a senha pelo tinker, como no docs/deploy.md
+        run: |
+          tinker() { docker compose exec -T app php artisan tinker --execute "$1"; }
+          tinker 'App\Models\User::forceCreate(["name" => "Teste", "email" => "teste@example.com", "password" => "senha-antiga-123", "email_verified_at" => now()]);'
+          tinker "App\Models\User::first()->update(['password' => 'a senha nova']);"
+          resultado=$(tinker "echo Illuminate\Support\Facades\Hash::check('a senha nova', App\Models\User::first()->password) ? 'trocada' : 'igual';")
+          echo "$resultado"
+          test "$resultado" = "trocada"
+
+      - name: Logs, se algo falhou
+        if: failure()
+        run: docker compose logs
+
+      - name: Login no GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publica a imagem que passou no teste
+        if: github.event_name == 'push'
+        run: |
+          destino=ghcr.io/canhao43/financas-com-ia
+          for tag in latest "sha-${GITHUB_SHA::7}"; do
+            docker tag financas:teste "$destino:$tag"
+            docker push "$destino:$tag"
+          done

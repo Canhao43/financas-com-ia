@@ -1,0 +1,53 @@
+# Produção: o site e o agendador, da mesma imagem. Passo a passo em docs/deploy.md.
+name: financas
+
+x-app: &app
+    # IMAGEM e VERSAO existem para o teste do CI e para voltar a uma versão anterior
+    # (VERSAO=sha-1a2b3c4). No dia a dia, ficam no padrão.
+    image: ${IMAGEM:-ghcr.io/canhao43/financas-com-ia}:${VERSAO:-latest}
+    env_file: .env
+    restart: unless-stopped
+    # O driver "local" gira os arquivos de log sozinho; o padrão do Docker cresce até encher o disco.
+    logging:
+        driver: local
+
+services:
+    app:
+        <<: *app
+        ports:
+            - '80:80'
+            - '443:443'
+            - '443:443/udp'
+        volumes:
+            # Banco, backups locais e configuração do rclone.
+            - dados:/dados
+            # Certificados do Let's Encrypt: sem isso, cada recriação do container pediria um novo.
+            - caddy:/data/caddy
+        # O /up do Laravel pelo mesmo caminho de quem acessa: HTTPS, no nome do site. É o que o
+        # "up --wait" do atualizar.sh espera antes de dar a atualização por concluída.
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - curl -kfsS --resolve "$${SERVER_NAME}:443:127.0.0.1" "https://$${SERVER_NAME}/up" > /dev/null
+            interval: 30s
+            timeout: 5s
+            start_period: 2m
+            start_interval: 5s
+
+    agendador:
+        <<: *app
+        command: ['php', 'artisan', 'schedule:work']
+        volumes:
+            - dados:/dados
+        # Saudável = o app sobe com a configuração de produção e enxerga o banco migrado.
+        # Precisa existir: o "up --wait" recusa serviço com a checagem desligada.
+        healthcheck:
+            test: ['CMD', 'php', 'artisan', 'migrate:status']
+            interval: 5m
+            timeout: 30s
+            start_period: 2m
+            start_interval: 5s
+
+volumes:
+    dados:
+    caddy:

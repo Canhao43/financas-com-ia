@@ -35,6 +35,10 @@ O app fica em `http://localhost:8000`. No primeiro acesso, ative a autenticaçã
 
 Verificações (as mesmas do CI): `composer ci:check` — lint, checagem de tipos do front, PHPStan e testes.
 
+## Produção
+
+Uma imagem Docker com FrankenPHP (HTTPS automático pelo Caddy) e SQLite, publicada no GHCR a cada merge — depois de o CI subi-la como em produção e testar de fora, inclusive fazer e restaurar um backup. Passo a passo em [`docs/deploy.md`](docs/deploy.md).
+
 ## Princípios
 
 - **Dado real nunca entra no repositório.** Seeds e testes usam dado fictício; extrato e banco ficam fora do Git.
@@ -42,10 +46,11 @@ Verificações (as mesmas do CI): `composer ci:check` — lint, checagem de tipo
 - **A IA não faz conta.** Somas e comparações são calculadas no código e testadas; o modelo recebe os números prontos.
 - **Importar o mesmo extrato de novo não duplica nada.** Cada linha é reconhecida pelo identificador do banco ou por uma impressão digital dela, nada é gravado antes de uma prévia, e o app confere o próprio saldo com o que o banco informa.
 - **O mínimo de dado sai para a API de IA:** só o necessário para responder.
+- **Backup que ninguém confere não é backup.** Todo dia ele sai do servidor cifrado com uma chave que o servidor não tem, o painel avisa quando atrasa, e o CI restaura um a cada build.
 
 ## Stack
 
-Laravel 13 · PHP 8.4 · Inertia 3 · Vue 3 · TypeScript · Tailwind 4 · Fortify (2FA e passkeys) · PHPUnit 12 · PHPStan · GitHub Actions
+Laravel 13 · PHP 8.4 · Inertia 3 · Vue 3 · TypeScript · Tailwind 4 · Fortify (2FA e passkeys) · PHPUnit 12 · PHPStan · Docker · FrankenPHP · GitHub Actions
 
 ## Licença
 
