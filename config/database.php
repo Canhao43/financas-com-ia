@@ -38,8 +38,12 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
+            // Em produção, o site e o agendador (backup) abrem o mesmo arquivo. Sem espera,
+            // quem encontra o banco ocupado falha na hora com "database is locked".
+            'busy_timeout' => 5000,
+            // WAL: a leitura não espera a escrita terminar, e o backup lê sem travar o site.
+            'journal_mode' => 'wal',
+            // Fica o padrão (FULL): trocar durabilidade por velocidade não vale com um usuário só.
             'synchronous' => null,
             'transaction_mode' => 'DEFERRED',
         ],
