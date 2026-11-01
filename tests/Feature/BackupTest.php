@@ -223,10 +223,11 @@ class BackupTest extends TestCase
         $conferencia = app(BackupDoBanco::class);
         $conferencia->conferir($this->copiaDoBanco('boa'));
 
-        // Bytes estragados no meio do arquivo, onde ficam as páginas das tabelas: nem abre.
+        // Cabeçalho estragado: o SQLite nem reconhece o arquivo como banco. Estragar o meio do
+        // arquivo daria um erro diferente a cada tabela nova, conforme a página atingida.
         $corrompida = $this->copiaDoBanco('corrompida');
         $conteudo = (string) file_get_contents($corrompida);
-        file_put_contents($corrompida, substr_replace($conteudo, str_repeat("\xFF", 4096), intdiv(strlen($conteudo), 2), 4096));
+        file_put_contents($corrompida, substr_replace($conteudo, str_repeat("\xFF", 100), 0, 100));
 
         // Abre e consulta normalmente, mas o índice não bate com a tabela.
         $inconsistente = $this->copiaDoBanco('inconsistente');
