@@ -23,6 +23,8 @@ class AcessoTest extends TestCase
             'nova conta' => ['contas.create'],
             'categorias' => ['categorias.index'],
             'nova categoria' => ['categorias.create'],
+            'importações' => ['importacoes.index'],
+            'importar extrato' => ['importacoes.create'],
         ];
     }
 
