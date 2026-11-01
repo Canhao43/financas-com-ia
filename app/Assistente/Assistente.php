@@ -6,10 +6,7 @@ use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Beta\Messages\BetaTextBlock;
 use Anthropic\Beta\Messages\BetaToolUseBlock;
 use Anthropic\Client;
-use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIException;
-use Anthropic\Core\Exceptions\AuthenticationException;
-use Anthropic\Core\Exceptions\RateLimitException;
 use App\Enums\SituacaoDaResposta;
 use App\Models\Conversa;
 use App\Models\Mensagem;
@@ -49,7 +46,7 @@ final class Assistente
         try {
             for ($rodada = 1; $rodada <= config()->integer('assistente.max_rodadas'); $rodada++) {
                 $mensagem = $this->chamar($mensagens);
-                $resposta->contar($mensagem);
+                $resposta->consumo->contar($mensagem);
 
                 if ($mensagem->stopReason === 'refusal') {
                     return $this->gravar($conversa, $resposta, SituacaoDaResposta::Recusada,
@@ -76,20 +73,8 @@ final class Assistente
 
             return $this->gravar($conversa, $resposta, SituacaoDaResposta::Limite,
                 'Essa pergunta precisou de consultas demais e parei antes de terminar. Tente dividir em perguntas menores.');
-        } catch (AuthenticationException) {
-            return $this->gravar($conversa, $resposta, SituacaoDaResposta::Erro,
-                'A chave da API da Anthropic foi recusada. Confira ANTHROPIC_API_KEY no .env.');
-        } catch (RateLimitException) {
-            return $this->gravar($conversa, $resposta, SituacaoDaResposta::Erro,
-                'O limite de uso da API foi atingido. Tente de novo em alguns minutos.');
-        } catch (APIConnectionException) {
-            return $this->gravar($conversa, $resposta, SituacaoDaResposta::Erro,
-                'Não foi possível falar com o Claude (sem conexão ou demorou demais). Tente de novo.');
         } catch (APIException $erro) {
-            report($erro);
-
-            return $this->gravar($conversa, $resposta, SituacaoDaResposta::Erro,
-                'O Claude não respondeu agora. Tente de novo em instantes.');
+            return $this->gravar($conversa, $resposta, SituacaoDaResposta::Erro, ErroDaApi::mensagem($erro));
         }
     }
 
@@ -233,8 +218,8 @@ final class Assistente
             'consultas' => $resposta->consultas,
             'valores_das_consultas' => array_values(array_unique($resposta->valores)),
             'valores_sem_fonte' => $resposta->semFonte,
-            'modelo' => $resposta->modelo,
-            'uso' => $resposta->uso,
+            'modelo' => $resposta->consumo->modelo,
+            'uso' => $resposta->consumo->uso,
         ]);
     }
 }
