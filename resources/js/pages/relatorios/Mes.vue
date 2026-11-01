@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { computed } from 'vue';
 import CartaoComparacao from '@/components/CartaoComparacao.vue';
+import CartaoDaAnalise from '@/components/CartaoDaAnalise.vue';
 import { Button } from '@/components/ui/button';
 import Variacao from '@/components/Variacao.vue';
 import { mesPorExtenso, nomeDoMes } from '@/lib/datas';
@@ -10,7 +11,7 @@ import { formatarReais } from '@/lib/dinheiro';
 import { formatarPorcentagem } from '@/lib/porcentagem';
 import { relatorios } from '@/routes';
 import { index as lancamentos } from '@/routes/lancamentos';
-import type { Comparacao, LinhaDoRelatorio } from '@/types';
+import type { AnaliseDoMes, Comparacao, LinhaDoRelatorio } from '@/types';
 
 defineOptions({
     layout: {
@@ -34,6 +35,9 @@ const props = defineProps<{
     transferencias: number;
     despesasPorCategoria: LinhaDoRelatorio[];
     receitasPorCategoria: LinhaDoRelatorio[];
+    analise: AnaliseDoMes | null;
+    analiseLigada: boolean;
+    temLancamentos: boolean;
 }>();
 
 const anterior = computed(() => mesPorExtenso(props.mesAnterior));
@@ -120,6 +124,15 @@ function lancamentosDa(linha: LinhaDoRelatorio) {
             outra (como o pagamento da fatura do cartão) e ficam fora dos
             totais.
         </p>
+
+        <!-- Logo depois dos totais: o texto explica os números que acabaram de aparecer. -->
+        <CartaoDaAnalise
+            v-if="analise || temLancamentos"
+            :mes="mes"
+            :analise="analise"
+            :ligada="analiseLigada"
+            :tem-lancamentos="temLancamentos"
+        />
 
         <p
             v-if="vazio"

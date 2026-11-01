@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnaliseController;
 use App\Http\Controllers\AssistenteController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ContaController;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('throttle:10,1')->group(function () {
         Route::post('assistente', [AssistenteController::class, 'store'])->name('assistente.store');
         Route::post('assistente/{conversa}', [AssistenteController::class, 'perguntar'])->name('assistente.perguntar');
+        Route::post('relatorios/analise', AnaliseController::class)->name('relatorios.analise');
     });
 });
 

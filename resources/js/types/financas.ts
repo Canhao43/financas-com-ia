@@ -82,3 +82,14 @@ export type LinhaDoRelatorio = {
     /** Quanto a linha é do total do grupo, em pontos-base. */
     participacao: number;
 };
+
+export type AnaliseDoMes = {
+    resumo: string;
+    destaques: string[];
+    /** Valores do texto que não estão nos números do mês, mesmo depois da correção. */
+    valoresSemFonte: string[];
+    /** Os números do mês mudaram depois que a análise foi escrita. */
+    desatualizada: boolean;
+    escritaEm: string | null;
+    modelo: string | null;
+};
