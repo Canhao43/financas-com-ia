@@ -71,12 +71,23 @@ class Lancamento extends Model
      */
     public function scopeDoMes(Builder $query, CarbonImmutable $mes): Builder
     {
-        // Intervalo semiaberto: com "between dia 1 e dia 31", o SQLite (que guarda "2026-10-31 00:00:00"
-        // como texto) deixaria o último dia do mês de fora. Coluna com o nome da tabela: o relatório
-        // junta as categorias na mesma consulta.
+        return $query->noPeriodo($mes->startOfMonth(), $mes->endOfMonth());
+    }
+
+    /**
+     * Do dia "de" ao dia "até", os dois inclusive.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeNoPeriodo(Builder $query, CarbonImmutable $de, CarbonImmutable $ate): Builder
+    {
+        // Intervalo semiaberto: com "between", o SQLite (que guarda "2026-10-31 00:00:00" como texto)
+        // deixaria o último dia de fora. Coluna com o nome da tabela: o relatório junta as categorias
+        // na mesma consulta.
         return $query
-            ->where($query->qualifyColumn('data'), '>=', $mes->startOfMonth()->toDateString())
-            ->where($query->qualifyColumn('data'), '<', $mes->startOfMonth()->addMonth()->toDateString());
+            ->where($query->qualifyColumn('data'), '>=', $de->toDateString())
+            ->where($query->qualifyColumn('data'), '<', $ate->startOfDay()->addDay()->toDateString());
     }
 
     public function ehEntrada(): bool
