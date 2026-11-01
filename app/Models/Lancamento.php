@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrigemLancamento;
+use App\Enums\TipoCategoria;
 use Carbon\CarbonImmutable;
 use Database\Factories\LancamentoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -76,6 +77,19 @@ class Lancamento extends Model
         return $query
             ->where('data', '>=', $mes->startOfMonth()->toDateString())
             ->where('data', '<', $mes->startOfMonth()->addMonth()->toDateString());
+    }
+
+    /**
+     * Sem as transferências entre contas: o que sobra é receita e despesa de verdade, com ou sem
+     * categoria. O pagamento da fatura, por exemplo, não é gasto: as compras do cartão já são.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeSemTransferencias(Builder $query): Builder
+    {
+        return $query->whereDoesntHave('categoria', fn (Builder $categoria) => $categoria
+            ->where('tipo', TipoCategoria::Transferencia));
     }
 
     public function ehEntrada(): bool
