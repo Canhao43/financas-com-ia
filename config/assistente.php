@@ -21,6 +21,10 @@ return [
     // Quantas perguntas anteriores da conversa vão junto, para "e em setembro?" funcionar.
     'perguntas_anteriores' => 6,
 
+    // Na análise do mês, quantas vezes o Claude reescreve se citar valor que não está nos
+    // dados. Uma chance basta para corrigir um deslize; se persistir, a tela mostra o aviso.
+    'correcoes_da_analise' => 1,
+
     // Segundos por chamada à API, contando as novas tentativas automáticas do SDK.
     'timeout' => 60,
 
