@@ -5,7 +5,7 @@ import CartaoValor from '@/components/CartaoValor.vue';
 import LinhaLancamento from '@/components/LinhaLancamento.vue';
 import { Button } from '@/components/ui/button';
 import { nomeDoMes } from '@/lib/datas';
-import { dashboard } from '@/routes';
+import { dashboard, relatorios } from '@/routes';
 import { create as novaConta } from '@/routes/contas';
 import { create, index } from '@/routes/lancamentos';
 import type { LancamentoDaLista } from '@/types';
@@ -63,6 +63,12 @@ defineProps<{
             <CartaoValor titulo="Receitas do mês" :centavos="receitasDoMes" />
             <CartaoValor titulo="Despesas do mês" :centavos="despesasDoMes" />
         </div>
+
+        <Button variant="link" size="sm" class="self-start px-0" as-child>
+            <Link :href="relatorios({ query: { mes } })"
+                >Ver o relatório do mês, por categoria</Link
+            >
+        </Button>
 
         <section class="space-y-2">
             <div class="flex items-center justify-between">

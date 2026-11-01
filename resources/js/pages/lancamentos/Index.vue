@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ChevronLeft, ChevronRight, Plus } from '@lucide/vue';
+import { ChevronLeft, ChevronRight, Plus, X } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import CartaoValor from '@/components/CartaoValor.vue';
 import LinhaLancamento from '@/components/LinhaLancamento.vue';
 import NativeSelect from '@/components/NativeSelect.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { nomeDoMes } from '@/lib/datas';
 import { create, index } from '@/routes/lancamentos';
@@ -26,6 +27,8 @@ const props = defineProps<{
     mesAnterior: string;
     mesSeguinte: string;
     contaId: number | null;
+    /** Filtro que vem do relatório: o id da categoria, ou "sem". */
+    categoria: { filtro: string; nome: string } | null;
     contas: Opcao[];
     lancamentos: LancamentoDaLista[];
     totais: { entradas: number; saidas: number; saldo: number };
@@ -33,14 +36,33 @@ const props = defineProps<{
 
 const conta = ref(props.contaId ? String(props.contaId) : '');
 
-// Trocar de mês mantém o filtro de conta.
+// Trocar de mês ou de conta mantém os outros filtros.
+function comFiltros(filtros: {
+    mes?: string;
+    conta?: string | number | null;
+    categoria?: string | null;
+}) {
+    return {
+        query: {
+            mes: filtros.mes ?? props.mes,
+            conta:
+                (filtros.conta === undefined ? props.contaId : filtros.conta) ||
+                undefined,
+            categoria:
+                (filtros.categoria === undefined
+                    ? props.categoria?.filtro
+                    : filtros.categoria) || undefined,
+        },
+    };
+}
+
 function doMes(mes: string) {
-    return index({ query: { mes, conta: props.contaId ?? undefined } });
+    return index(comFiltros({ mes }));
 }
 
 watch(conta, (escolhida) => {
     router.get(
-        index.url({ query: { mes: props.mes, conta: escolhida || undefined } }),
+        index.url(comFiltros({ conta: escolhida })),
         {},
         { preserveScroll: true },
     );
@@ -87,6 +109,20 @@ watch(conta, (escolhida) => {
                     <Link :href="create()"><Plus />Novo</Link>
                 </Button>
             </div>
+        </div>
+
+        <div v-if="categoria" class="flex items-center gap-2 text-sm">
+            <span class="text-muted-foreground">Categoria:</span>
+            <Badge variant="secondary" class="gap-1">
+                {{ categoria.nome }}
+                <Link
+                    :href="index(comFiltros({ categoria: null }))"
+                    aria-label="Mostrar todas as categorias"
+                    class="-mr-1 rounded-sm p-0.5 hover:bg-muted"
+                >
+                    <X class="size-3" />
+                </Link>
+            </Badge>
         </div>
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
