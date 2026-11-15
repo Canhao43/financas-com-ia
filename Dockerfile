@@ -4,7 +4,7 @@
 # de daqui a um mês saem da mesma base. Quem propõe atualizar é o Dependabot, num PR.
 
 # FrankenPHP: o Caddy (servidor web com HTTPS automático) e o PHP num binário só.
-FROM dunglas/frankenphp:1.13.4-php8.4-trixie@sha256:afc8e39e245f0f8084fa47ac55070c9da088bee472fa71ca291f703bdd47f4cc AS base
+FROM dunglas/frankenphp:1.13.4-php8.4-trixie@sha256:0bf947c0c5bb73600354fb8444ef878f9875dfb21dbfe8bf34c7f4c72c2e3e9b AS base
 WORKDIR /app
 # O .dockerignore deixa o storage local de fora; as pastas que o Laravel espera nascem aqui.
 RUN mkdir -p storage/app/private storage/app/public storage/logs \
